@@ -123,3 +123,14 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Visual Studio
+.vs/
+
+# Temp files
+~*
+*.swp
+*.swo
+src/results*
+log*.txt
+*.lock
