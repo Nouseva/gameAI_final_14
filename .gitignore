@@ -126,6 +126,7 @@ dmypy.json
 
 # Visual Studio
 .vs/
+.vscode/
 
 # Temp files
 ~*
