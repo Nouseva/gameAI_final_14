@@ -86,6 +86,8 @@ class Layout(object):
             self.numEnemies += 1
 
 def getLayout(name, layout_dir = DEFAULT_LAYOUT_DIR, maxEnemies = None):
+    """Converts a given text doc into a Layout object
+    """
     if (not name.endswith('.lay')):
         name += '.lay'
 
