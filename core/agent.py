@@ -30,15 +30,15 @@ class Agent(pygame.sprite.Sprite):
 
         Args:
             action (tuple): a direction normalized to a maze step
-            walls (dict): Rects which are the maze walls
+            walls (list): Rects which are the maze walls
 
         Returns:
             : False if action will cause agent to collide with walls, True otherwise
 
         """
         self.rect = self.rect.move(action)
-        collision = self.rect.collidedict(walls)
-        if collision:
+        collision = self.rect.collidelist(walls)
+        if collision == -1:
             # TODO: behavior when agent collides with wall
             # maybe never executed since ai controlled but w/e
             self.bump.play() # Hit wall

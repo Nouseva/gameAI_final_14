@@ -16,7 +16,9 @@ class Layout(object):
         self.width  = len(layoutText[0])
         self.height = len(layoutText)
         self.walls  = Grid(self.width, self.height, initialValue = False)
+        self.food   = Grid(self.width, self.height, initialValue = False)
         self.goal   = None
+        
         self.agentPositions = []
         self.numEnemies = 0
         self.layoutText = layoutText
@@ -58,7 +60,8 @@ class Layout(object):
             % - Wall
             G - Goal
             E - Enemy
-            A - Agent
+            P - Player Agent
+            o - Food
         '''
         Other characters are ignored
         """
@@ -75,7 +78,9 @@ class Layout(object):
             self.walls[x][y] = True
         elif layoutChar == 'G':
             self.goal = (x, y)
-        elif layoutChar == 'A':
+        elif layoutChar == 'o':
+            self.food[x][y] == True
+        elif layoutChar == 'P':
             self.agentPositions.append((0, (x, y)))
         elif layoutChar == 'E' and (maxEnemies is None or self.numEnemies < maxEnemies):
             self.agentPositions.append((1, (x, y)))
