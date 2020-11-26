@@ -1,4 +1,0 @@
-
-class Menu(object):
-    
-    pass
