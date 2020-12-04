@@ -23,7 +23,7 @@ class Agent(pygame.sprite.Sprite):
         if pos:
             self.rect = self.rect.move(pos)
         self.index = index
-        self.bump  = utils.load_sound('collision.ogg')
+        # self.bump  = utils.load_sound('collision.ogg')
 
     def update(self, action, walls):
         """Move based on the action that was given
@@ -39,9 +39,10 @@ class Agent(pygame.sprite.Sprite):
         self.rect = self.rect.move(action)
         collision = self.rect.collidelist(walls)
         if collision == -1:
+            pass
             # TODO: behavior when agent collides with wall
             # maybe never executed since ai controlled but w/e
-            self.bump.play() # Hit wall
+            # self.bump.play() # Hit wall
         return collision
     
     def getRect(self):
