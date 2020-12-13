@@ -7,6 +7,8 @@ try:
     import pygame_menu
 
     from pygame.locals import *
+    from collections import namedtuple
+    from itertools import chain
 
     from core import utils
     from core.agent import Agent
@@ -23,8 +25,15 @@ BG_COLOR = 'black'
 WALL_THICKNESS = 20
 WALL_COLOR = 'white'
 
+Item = namedtuple('Item', ['name', 'cost', 'effect', 'slot'])
+
 ACTIVE_LEVEL = None
 LOADED_LEVEL = None
+EQUIP_PURCHASED = dict()
+PLAYER_MONEY = 0
+
+# ITEMS = None
+ITEM_DICT = None
 
 LEVEL_SELECT = None
 EQUIP_STORE = None
@@ -126,6 +135,19 @@ def create_equipment_select(player_inventory):
     pass
 
 def _purchase_item(item):
+    global PLAYER_MONEY
+    global EQUIP_PURCHASED
+    print(item)
+
+    # Item has already been purchased
+    if item in EQUIP_PURCHASED[item.slot]:
+        return
+
+    if PLAYER_MONEY >= item.cost:
+        PLAYER_MONEY -= item.cost
+        EQUIP_PURCHASED[item.slot].append(item)
+        print(item.name, 'purchased')
+
     pass
 
 def create_equipment_shop(item_list):
@@ -139,13 +161,16 @@ def create_equipment_shop(item_list):
 
     """
     global EQUIP_STORE
+    global ITEM_DICT
+    ITEM_DICT = dict()
+
     menu_shop = pygame_menu.Menu(
         SCREEN_HEIGHT, SCREEN_WIDTH, 'Item Shop',
         theme   = pygame_menu.themes.THEME_DARK,
         columns = 7,
         rows    = 3,
         enabled = False,
-        onclose = pygame_menu.events.BACK,
+        onclose = pygame_menu.events.EXIT,
         center_content = False,
         # menu_position = (0, 0),
         # mouse_motion_selection = True,
@@ -154,7 +179,9 @@ def create_equipment_shop(item_list):
     tile_size = SCREEN_WIDTH - (tile_padding * len(item_list))
     tile_size = tile_size / len(item_list)
     for item in item_list:
-        menu_shop.add_button(item[0], _purchase_item, item)
+        menu_shop.add_button(item.name, _purchase_item, item)
+        c_menu = menu_shop.get_index()
+        ITEM_DICT[c_menu] = item
 
     EQUIP_STORE = menu_shop
     EQUIP_STORE.disable()
@@ -173,8 +200,17 @@ def goto_level_select(surface, maze_layouts):
     # TODO: Fix bug where ACTIVE_LEVEL does not match selector after first call
     ACTIVE_LEVEL = maze_layouts[0][1]
     LEVEL_SELECT.enable()
-    LEVEL_SELECT.mainloop(surface)
+    # print('level_select active')
+    while LEVEL_SELECT.is_enabled():
+        events = pygame.event.get()
+
+        LEVEL_SELECT.draw(surface)
+        LEVEL_SELECT.update(events)
+
+        pygame.display.update()
+    # LEVEL_SELECT.mainloop(surface)
     # LEVEL_SELECT.disable()
+    # print('level_select inactive')
     walls, agents, foreground = load_layout(LOADED_LEVEL)
     plain_sprites = pygame.sprite.RenderPlain(agents)
 
@@ -182,9 +218,33 @@ def goto_level_select(surface, maze_layouts):
 
 def goto_equip_store(surface):
     global EQUIP_STORE
+    global PLAYER_MONEY
 
     EQUIP_STORE.enable()
-    EQUIP_STORE.mainloop(surface)
+    while EQUIP_STORE.is_enabled():
+        events = pygame.event.get()
+
+        for event in events:
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == K_0:
+                    PLAYER_MONEY = 0
+                    print(PLAYER_MONEY)
+                elif event.key == K_PLUS:
+                    PLAYER_MONEY += 1000
+                    print(PLAYER_MONEY)
+                elif event.key == K_MINUS:
+                    PLAYER_MONEY -= 1000
+                    print(PLAYER_MONEY)
+
+            
+            EQUIP_STORE.update(events)
+            EQUIP_STORE.draw(surface)
+
+        
+
+        pygame.display.update()
+    # EQUIP_STORE.get_selected_widget().get_title()
 
     pass
 
@@ -322,14 +382,19 @@ if __name__ == "__main__":
     ]
 
     global ITEMS
-    # Items are a dictionary with { (item_name, item_cost) : purchased } entries
-    ITEMS = {
-        ('Wheels', 10) : False,
-        ('Backpack', 20) : False,
-        ('Claws', 10) : False,
-        ('Some Junk', 999): False,
-        ('Magguffin 5000', 4999) : False,
-    }
+    # Items is a list of namedtuple Item()
+    ITEMS = [
+        Item('Wheels', 10, 'Wheely fast', 'legs'),
+        Item('Backpack', 20, 'Soft sack', 'torso'),
+        Item('Claws', 10, 'Spiky', 'arms'),
+        Item('Some Junk', 999, 'Useless', 'trinket'),
+        Item('Magguffin 5000', 4999, 'One to rule them all', 'trinket'),
+    ]
+
+    EQUIP_PURCHASED['legs'] = []
+    EQUIP_PURCHASED['torso'] = []
+    EQUIP_PURCHASED['arms'] = []
+    EQUIP_PURCHASED['trinket'] = []
 
     # layouts_dict = { layout_name: getLayout(layout_name) for layout_name, display_name in layouts }
 
