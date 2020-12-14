@@ -24,12 +24,14 @@ SCREEN_SIZE = SCREEN_WIDTH, SCREEN_HEIGHT = 1200, 600
 BG_COLOR = 'black'
 WALL_THICKNESS = 20
 WALL_COLOR = 'white'
+surface_main = None
 
 Item = namedtuple('Item', ['name', 'cost', 'effect', 'slot'])
 
 ACTIVE_LEVEL = None
 LOADED_LEVEL = None
 EQUIP_PURCHASED = dict()
+CURRENT_EQUIP = dict()
 PLAYER_MONEY = 0
 
 # ITEMS = None
@@ -50,6 +52,7 @@ def load_layout(layout):
     """
 
     _set_level(0, layout)
+    print(layout)
 
     loaded_layout = pygame.Surface(SCREEN_SIZE)
     walls = []
@@ -126,12 +129,45 @@ def create_level_select(level_list):
     LEVEL_SELECT = menu_level
     # return menu_level
 
-def create_equipment_select(player_inventory):
+def _set_equipment(name, cost, descr, slot):#value, item_name):
+    global CURRENT_EQUIP
+    global EQUIP_PURCHASED
+
+    CURRENT_EQUIP[slot] = EQUIP_PURCHASED[slot][name[1]]
+    # print(name, val, desc, slot)
+    pass
+
+def _complete_selection(menu):
+    global CURRENT_EQUIP
+
+    menu.disable()
+    print(CURRENT_EQUIP)
+
+def create_equipment_select():
     """ Constructs the menu that allows player to equip their agent (choose heuristics)
     
     """
     global EQUIP_MENU
+    global EQUIP_PURCHASED
 
+    menu_equip = pygame_menu.Menu(
+        SCREEN_HEIGHT, SCREEN_WIDTH, 'Modification Station',
+        theme = pygame_menu.themes.THEME_DARK,
+        menu_position = (0,0),
+        mouse_motion_selection = True,
+        enabled = False,
+        onclose = pygame_menu.events.EXIT,
+    )
+
+    for slot, gear_list in EQUIP_PURCHASED.items():
+        menu_equip.add_selector(
+            title = slot,
+            items = gear_list,
+            onchange = _set_equipment,
+        )
+
+    menu_equip.add_button('Play', _complete_selection, menu_equip)
+    EQUIP_MENU = menu_equip
     pass
 
 def _purchase_item(item):
@@ -148,6 +184,14 @@ def _purchase_item(item):
         EQUIP_PURCHASED[item.slot].append(item)
         print(item.name, 'purchased')
 
+    pass
+
+def _complete_purchases ():
+    global EQUIP_MENU
+    global EQUIP_STORE
+
+    EQUIP_MENU.enable()
+    EQUIP_STORE.disable()
     pass
 
 def create_equipment_shop(item_list):
@@ -183,15 +227,17 @@ def create_equipment_shop(item_list):
         c_menu = menu_shop.get_index()
         ITEM_DICT[c_menu] = item
 
+    menu_shop.add_vertical_margin(200)
+
+    menu_shop.add_button(
+        title = 'Equip Bot',
+        action = _complete_purchases,
+        align = pygame_menu.locals.ALIGN_CENTER,
+
+        )
     EQUIP_STORE = menu_shop
     EQUIP_STORE.disable()
     # return menu_shop
-
-def augment_store():
-    pass
-
-def augment_config():
-    pass
 
 def goto_level_select(surface, maze_layouts):
     global ACTIVE_LEVEL
@@ -199,7 +245,7 @@ def goto_level_select(surface, maze_layouts):
 
     # TODO: Fix bug where ACTIVE_LEVEL does not match selector after first call
     ACTIVE_LEVEL = maze_layouts[0][1]
-    LEVEL_SELECT.enable()
+    # LEVEL_SELECT.enable()
     # print('level_select active')
     while LEVEL_SELECT.is_enabled():
         events = pygame.event.get()
@@ -220,7 +266,7 @@ def goto_equip_store(surface):
     global EQUIP_STORE
     global PLAYER_MONEY
 
-    EQUIP_STORE.enable()
+    # EQUIP_STORE.enable()
     while EQUIP_STORE.is_enabled():
         events = pygame.event.get()
 
@@ -237,21 +283,39 @@ def goto_equip_store(surface):
                     PLAYER_MONEY -= 1000
                     print(PLAYER_MONEY)
 
+        EQUIP_STORE.draw(surface)
+        EQUIP_STORE.update(events)
             
-            EQUIP_STORE.update(events)
-            EQUIP_STORE.draw(surface)
 
         
 
         pygame.display.update()
     # EQUIP_STORE.get_selected_widget().get_title()
+    print(EQUIP_PURCHASED)
+    pass
+
+def goto_equip_screen(surface):
+    global EQUIP_MENU
+
+    # EQUIP_MENU.enable()
+    while EQUIP_MENU.is_enabled():
+        events = pygame.event.get()
+
+        for event in events:
+
+            if event.type == pygame.KEYDOWN:
+                pass
+
+        EQUIP_MENU.draw(surface)
+        EQUIP_MENU.update(events)
+
+        pygame.display.update()
 
     pass
 
-
-
 def main(maze_layouts):
     global ACTIVE_LEVEL
+    global surface_main
     # ACTIVE_LEVEL = maze_layouts[0][1]
 
     pygame.init()
@@ -271,10 +335,12 @@ def main(maze_layouts):
     create_level_select(maze_layouts)
     
     create_equipment_shop(ITEMS)
+    create_equipment_select()
 
     # TODO: Fix menu display
     # level_select_menu.mainloop(surface_main)
-    walls, plain_sprites, foreground = goto_level_select(surface_main, maze_layouts)
+    LEVEL_SELECT.enable()
+    # walls, plain_sprites, foreground = goto_level_select(surface_main, maze_layouts)
 
 
     """
@@ -316,7 +382,8 @@ def main(maze_layouts):
 
                 # key 'l' (lower L) enables level select menu
                 if event.key == pygame.K_l:
-                    walls, plain_sprites, foreground = goto_level_select(surface_main, maze_layouts)
+                    LEVEL_SELECT.enable()
+                    # walls, plain_sprites, foreground = goto_level_select(surface_main, maze_layouts)
                     # ACTIVE_LEVEL = maze_layouts[0][1]
                     # level_select_menu.toggle()
                     # level_select_menu.mainloop(surface_main)
@@ -324,13 +391,15 @@ def main(maze_layouts):
                     # plain_sprites = pygame.sprite.RenderPlain(agents)
                 # key 'p' enables store menu
                 elif event.key == pygame.K_p:
-                    goto_equip_store(surface_main)
+                    EQUIP_STORE.enable()
+                    # goto_equip_store(surface_main)
                     # equip_shop_menu.toggle()
                     # equip_shop_menu.mainloop(surface_main)
                     pass
 
                 # key 'i' enables equipment menu
                 elif event.key == pygame.K_i:
+                    EQUIP_MENU.enable()
                     pass
             
             # Ball will only move when the mouse button is held down
@@ -357,9 +426,13 @@ def main(maze_layouts):
                             ball_speed[1] = -ball_speed[1]
                         # """
 
-        # if level_select_menu.is_enabled():
-        #     level_select_menu.update(events)
-        #     level_select_menu.draw(surface_main)
+        if LEVEL_SELECT.is_enabled():
+            walls, plain_sprites, foreground = goto_level_select(surface_main, maze_layouts)
+        if EQUIP_STORE.is_enabled():
+            goto_equip_store(surface_main)
+        if EQUIP_MENU.is_enabled():
+            print('hellp')
+            goto_equip_screen(surface_main)
 
         # plain_sprites.update()
         surface_main.blit(background, (0, 0))
@@ -391,14 +464,19 @@ if __name__ == "__main__":
         Item('Magguffin 5000', 4999, 'One to rule them all', 'trinket'),
     ]
 
-    EQUIP_PURCHASED['legs'] = []
-    EQUIP_PURCHASED['torso'] = []
-    EQUIP_PURCHASED['arms'] = []
-    EQUIP_PURCHASED['trinket'] = []
+    EQUIP_PURCHASED['legs'] = [Item('', 0, '', 'legs')]
+    EQUIP_PURCHASED['torso'] = [Item('', 0, '', 'torso')]
+    EQUIP_PURCHASED['arms'] = [Item('', 0, '', 'arms')]
+    EQUIP_PURCHASED['trinket'] = [Item('', 0, '', 'trinket')]
+    CURRENT_EQUIP['legs'] = EQUIP_PURCHASED['legs'][0]
+    CURRENT_EQUIP['torso'] = EQUIP_PURCHASED['torso'][0]
+    CURRENT_EQUIP['arms'] = EQUIP_PURCHASED['arms'][0]
+    CURRENT_EQUIP['trinket'] = EQUIP_PURCHASED['trinket'][0]
+
 
     # layouts_dict = { layout_name: getLayout(layout_name) for layout_name, display_name in layouts }
 
-    # print(layouts_dict)
+    print(layouts)
     main(layouts)
 
 
