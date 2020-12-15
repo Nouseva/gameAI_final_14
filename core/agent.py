@@ -7,11 +7,17 @@ from . import utils
 def calculateValue(object, depth, discount):
     discountMultiplier = discount**depth
     if (object == 'E'):
-        value = 50
+        value = 60
     elif (object == '.'):
-        value = 50
+        value = 10
+    elif (object == ','):
+        value = 20
+    elif (object == '-'):
+        value == 30
+    elif (object == 'G'):
+        value == 0
     elif (object == 'P'):
-        value = 50
+        value = 0
 
     finalValue = discountMultiplier * value
     return finalValue
@@ -36,28 +42,28 @@ def calculateBestMove(mapArr, currentX, currentY, historyList, valuesDict, visio
         nValue = -1000
     else:
         _, nFutureValue = calculateBestMove(mapArr, currentX, currentY+1, historyList, valuesDict, visionScore, depth+1, discount)
-        nValue = calculateValue(nObj, depth, discount) + nFutureValue
+        nValue = calculateValue(nObj, depth, discount) + nFutureValue # + hueristic()
         valuesArr[0] = nValue
 
     if (eObj == '%' or (currentX, currentY) in historyList):
         eValue = -1000
     else:
         _, eFutureValue = calculateBestMove(mapArr, currentX+1, currentY, historyList, valuesDict, visionScore, depth+1, discount)
-        eValue = calculateValue(eObj, depth, discount) + eFutureValue
+        eValue = calculateValue(eObj, depth, discount) + eFutureValue # + hueristic()
         valuesArr[1] = eValue
 
     if (sObj == '%' or (currentX, currentY) in historyList):
         sValue = -1000
     else:
         _, sFutureValue = calculateBestMove(mapArr, currentX, currentY-1, historyList, valuesDict, visionScore, depth+1, discount)
-        sValue = calculateValue(sObj, depth, discount) + sFutureValue
+        sValue = calculateValue(sObj, depth, discount) + sFutureValue # + hueristic()
         valuesArr[2] = sValue
 
     if (wObj == '%' or (currentX, currentY) in historyList):
         wValue = -1000
     else:
         _, wFutureValue = calculateBestMove(mapArr, currentX-1, currentY, historyList, valuesDict, visionScore, depth+1, discount)
-        wValue = calculateValue(wObj, depth, discount) + wFutureValue
+        wValue = calculateValue(wObj, depth, discount) + wFutureValue # + hueristic()
         valuesArr[3] = wValue
 
     #out of all the options presented, return the move, which should be max index, and the heuristical value which is needed for any recursive calculations.
