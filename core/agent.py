@@ -13,7 +13,7 @@ def calculateValue(object, depth, discount):
     elif (object == 'P'):
         value = 50
 
-    finalValue = discountMultiplier * value 
+    finalValue = discountMultiplier * value
     return finalValue
 #return values are best move, which would be 0 = N, 1 = E, 2 = S, 3 = W.
 #The second return value is heuristic score for computation of best move associated with that step.
@@ -82,7 +82,7 @@ class Agent(pygame.sprite.Sprite):
 
     """
 
-    def __init__(self, image, pos = None, index = 0):
+    def __init__(self, image, heurstic = None, pos = None, index = 0):
         pygame.sprite.Sprite.__init__(self)
         self.image, self.rect = utils.load_image(image, -1)
         if pos:
@@ -90,7 +90,7 @@ class Agent(pygame.sprite.Sprite):
         self.index = index
         # self.bump  = utils.load_sound('collision.ogg')
 
-    def update(self, action, walls):
+    def update(self, action, list_of_components, walls):
         """Move based on the action that was given
 
         Args:
@@ -101,6 +101,7 @@ class Agent(pygame.sprite.Sprite):
             : False if action will cause agent to collide with walls, True otherwise
 
         """
+
         self.rect = self.rect.move(action)
         collision = self.rect.collidelist(walls)
         if collision == -1:
@@ -112,3 +113,5 @@ class Agent(pygame.sprite.Sprite):
 
     def getRect(self):
         return self.rect
+
+    # HEURISTIC FUNCTION HERE
