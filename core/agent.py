@@ -114,4 +114,14 @@ class Agent(pygame.sprite.Sprite):
     def getRect(self):
         return self.rect
 
-    # HEURISTIC FUNCTION HERE
+    def heuristic(self, equiped_list, adj_value):
+        heur = 100
+        #if enemey
+
+        #if no enemy, but treasure
+
+        #if no enemy and no treasure
+
+
+        return heur
+
