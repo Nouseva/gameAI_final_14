@@ -35,29 +35,29 @@ def calculateBestMove(mapArr, currentX, currentY, historyList, valuesDict, visio
     if (nObj == '%' or (currentX, currentY) in historyList):
         nValue = -1000
     else:
-        _, nFutureValue = calculationBestMove(mapArr, currentX, currentY+1, historyList, valuesDict, visionScore, depth+1, discount)
-        nValue = calculateValue(nObj, depth, discount) + futureValue
+        _, nFutureValue = calculateBestMove(mapArr, currentX, currentY+1, historyList, valuesDict, visionScore, depth+1, discount)
+        nValue = calculateValue(nObj, depth, discount) + nFutureValue
         valuesArr[0] = nValue
 
     if (eObj == '%' or (currentX, currentY) in historyList):
         eValue = -1000
     else:
-        _, eFutureValue = calculationBestMove(mapArr, currentX+1, currentY, historyList, valuesDict, visionScore, depth+1, discount)
-        eValue = calculateValue(eObj, depth, discount) + futureValue
+        _, eFutureValue = calculateBestMove(mapArr, currentX+1, currentY, historyList, valuesDict, visionScore, depth+1, discount)
+        eValue = calculateValue(eObj, depth, discount) + eFutureValue
         valuesArr[1] = eValue
 
     if (sObj == '%' or (currentX, currentY) in historyList):
         sValue = -1000
     else:
-        _, sFutureValue = calculationBestMove(mapArr, currentX, currentY-1, historyList, valuesDict, visionScore, depth+1, discount)
-        sValue = calculateValue(sObj, depth, discount) + futureValue
+        _, sFutureValue = calculateBestMove(mapArr, currentX, currentY-1, historyList, valuesDict, visionScore, depth+1, discount)
+        sValue = calculateValue(sObj, depth, discount) + sFutureValue
         valuesArr[2] = sValue
 
     if (wObj == '%' or (currentX, currentY) in historyList):
         wValue = -1000
     else:
-        _, wFutureValue = calculationBestMove(mapArr, currentX-1, currentY, historyList, valuesDict, visionScore, depth+1, discount)
-        wValue = calculateValue(wObj, depth, discount) + futureValue
+        _, wFutureValue = calculateBestMove(mapArr, currentX-1, currentY, historyList, valuesDict, visionScore, depth+1, discount)
+        wValue = calculateValue(wObj, depth, discount) + wFutureValue
         valuesArr[3] = wValue
 
     #out of all the options presented, return the move, which should be max index, and the heuristical value which is needed for any recursive calculations.
