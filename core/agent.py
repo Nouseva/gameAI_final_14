@@ -1,6 +1,7 @@
 
 import pygame.sprite
 import operator
+from maze import CURRENT_EQUIP
 
 from . import utils
 
@@ -8,6 +9,8 @@ def calculateValue(object, depth, discount):
     discountMultiplier = discount**depth
     if (object == 'E'):
         value = 60
+    elif (object == 'o'):
+        value = 40
     elif (object == '.'):
         value = 10
     elif (object == ','):
@@ -21,9 +24,26 @@ def calculateValue(object, depth, discount):
 
     finalValue = discountMultiplier * value
     return finalValue
+
+def heuristic(self, equiped_list, adj_value):
+    heur = 0
+    empty_list = ['.', ',' ,'-']
+    #if enemey
+    if ('Claws' in equiped_list and adj_value == 'E'):
+        heur = -60
+    #if no enemy, but treasure
+    elif ('Backpack' in equiped_list and adj_value == 'o'):
+        heur = -40
+    #if no enemy and no treasure
+    elif ('Wheels' in equiped_list and adj_value in empty_list):
+        heur = -10
+    else:
+        heur = 100
+    return heur
+
 #return values are best move, which would be 0 = N, 1 = E, 2 = S, 3 = W.
 #The second return value is heuristic score for computation of best move associated with that step.
-def calculateBestMove(mapArr, currentX, currentY, historyList, valuesDict, visionScore, depth, discount):
+def calculateBestMove(self, mapArr, currentX, currentY, historyList, valuesDict, visionScore, depth, discount):
     #if reached peak of depth then end the recursion
     if (visionScore == depth):
         return 0, 0
@@ -41,29 +61,29 @@ def calculateBestMove(mapArr, currentX, currentY, historyList, valuesDict, visio
     if (nObj == '%' or (currentX, currentY) in historyList):
         nValue = -1000
     else:
-        _, nFutureValue = calculateBestMove(mapArr, currentX, currentY+1, historyList, valuesDict, visionScore, depth+1, discount)
-        nValue = calculateValue(nObj, depth, discount) + nFutureValue # + hueristic()
+        _, nFutureValue = calculateBestMove(self, mapArr, currentX, currentY+1, historyList, valuesDict, visionScore, depth+1, discount)
+        nValue = calculateValue(nObj, depth, discount) + nFutureValue + heuristic(self, CURRENT_EQUIP, nObj)
         valuesArr[0] = nValue
 
     if (eObj == '%' or (currentX, currentY) in historyList):
         eValue = -1000
     else:
-        _, eFutureValue = calculateBestMove(mapArr, currentX+1, currentY, historyList, valuesDict, visionScore, depth+1, discount)
-        eValue = calculateValue(eObj, depth, discount) + eFutureValue # + hueristic()
+        _, eFutureValue = calculateBestMove(self, mapArr, currentX+1, currentY, historyList, valuesDict, visionScore, depth+1, discount)
+        eValue = calculateValue(eObj, depth, discount) + eFutureValue + heuristic(self, CURRENT_EQUIP, eObj)
         valuesArr[1] = eValue
 
     if (sObj == '%' or (currentX, currentY) in historyList):
         sValue = -1000
     else:
-        _, sFutureValue = calculateBestMove(mapArr, currentX, currentY-1, historyList, valuesDict, visionScore, depth+1, discount)
-        sValue = calculateValue(sObj, depth, discount) + sFutureValue # + hueristic()
+        _, sFutureValue = calculateBestMove(self, mapArr, currentX, currentY-1, historyList, valuesDict, visionScore, depth+1, discount)
+        sValue = calculateValue(sObj, depth, discount) + sFutureValue + heuristic(self, CURRENT_EQUIP, sObj)
         valuesArr[2] = sValue
 
     if (wObj == '%' or (currentX, currentY) in historyList):
         wValue = -1000
     else:
-        _, wFutureValue = calculateBestMove(mapArr, currentX-1, currentY, historyList, valuesDict, visionScore, depth+1, discount)
-        wValue = calculateValue(wObj, depth, discount) + wFutureValue # + hueristic()
+        _, wFutureValue = calculateBestMove(self, mapArr, currentX-1, currentY, historyList, valuesDict, visionScore, depth+1, discount)
+        wValue = calculateValue(wObj, depth, discount) + wFutureValue  + heuristic(self, CURRENT_EQUIP, wObj)
         valuesArr[3] = wValue
 
     #out of all the options presented, return the move, which should be max index, and the heuristical value which is needed for any recursive calculations.
@@ -119,15 +139,4 @@ class Agent(pygame.sprite.Sprite):
 
     def getRect(self):
         return self.rect
-
-    def heuristic(self, equiped_list, adj_value):
-        heur = 100
-        #if enemey
-
-        #if no enemy, but treasure
-
-        #if no enemy and no treasure
-
-
-        return heur
 
