@@ -61,15 +61,6 @@ class Layout(object):
     def getGoal(self):
         return self.goal
 
-    # def getTile(self, pos):
-    #     print(pos, self.width, self.height)
-    #     print(self.layoutText)
-    #     if (pos[0]) in range(self.width) and pos[1] in range(self.height):
-    #         return self.layoutText[pos[0]][pos[1]]
-
-    #     else:
-    #         return None
-
     def __str__(self):
         return '\n'.join(self.layoutText)
 

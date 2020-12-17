@@ -28,6 +28,9 @@ class Point():
     
     def __getitem__(self, key):
         return self.tup[key]
+    
+    def __eq__(self, other):
+        return self.tup == other
 
 def load_image(name, colorkey=None):
     fullname = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'resources', name)

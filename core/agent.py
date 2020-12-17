@@ -1,7 +1,9 @@
 
 import pygame.sprite
 import operator
+
 # self.equipment = dict()
+from random import choice
 from . import utils
 
 def calculateValue(pos, layout, depth, discount):
@@ -69,13 +71,13 @@ class Agent(pygame.sprite.Sprite):
             x, y  = utils.nearestPoint((self.rect[0] / self.tile_size[0], self.rect[1] / self.tile_size[1]))
             self.pos = utils.Point(x, y)
         # self.rect = utils.nearestPoint(self.rect)
-
+    
         self.index = index
         self.equipment = equipment
         self.heuristic = heuristic
         # self.bump  = utils.load_sound('collision.ogg')
 
-    def update(self, action, list_of_components, layout):
+    def update(self, list_of_components, layout):
         """Move based on the action that was given
 
         Args:
@@ -86,7 +88,14 @@ class Agent(pygame.sprite.Sprite):
             : False if action will cause agent to collide with walls, True otherwise
 
         """
-        move, _ = self.calculateBestMove(layout, self.pos, [], dict(), 0, 10)
+        # Agent is enemy
+        if self.index > 0:
+            move = self.getRandNeighbor(layout)
+
+        # Agent is player
+        else:
+            move, _ = self.calculateBestMove(layout, self.pos, [], dict(), 0, 10)
+
         print('best_move', move)
         print('current_pos', self.pos)
         directional_move = (move[0] - self.pos.x, move[1]- self.pos.y)
@@ -107,6 +116,23 @@ class Agent(pygame.sprite.Sprite):
             return 8
         else:
             return 5
+
+    def getRandNeighbor(self, layout):
+        north = self.pos + utils.Point(0, 1)
+        east  = self.pos + utils.Point(1, 0)
+        south = self.pos + utils.Point(0, -1)
+        west  = self.pos + utils.Point(-1, 0)
+        stop  = self.pos
+
+        directions = [north, east, south, west, stop]
+        print(directions)
+        valid = []
+        for d in directions:
+            if not layout.isWall(d.tup):
+                valid.append(d)
+        move = choice(valid)
+
+        return move
 
     #return values are best move, which would be 0 = N, 1 = E, 2 = S, 3 = W.
     #The second return value is heuristic score for computation of best move associated with that step.

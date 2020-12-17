@@ -80,6 +80,7 @@ def load_layout(layout):
     pygame.draw.rect(loaded_layout, GOAL_COLOR, (gx * tile_width, gy * tile_height, tile_width, tile_height))
     
     for agent in layout.agentPositions:
+        print(agent)
         image = None
         # Player agent
         if agent[0]:
@@ -88,7 +89,10 @@ def load_layout(layout):
         else:
             image = 'test_icon.png'
 
-        agents.append(Agent(image, CURRENT_EQUIP, (tile_width, tile_height), pos=(agent[1][0], agent[1][1])))
+        if agent[0]:
+            agents.append(Agent(image, CURRENT_EQUIP, (tile_width, tile_height), pos=(agent[1][0], agent[1][1])))
+        else:
+            agents.append(Agent(image, CURRENT_EQUIP, (tile_width, tile_height), pos = (agent[1][0], agent[1][1]), index = 1))
         # print(agents)
 
 
@@ -484,7 +488,7 @@ def main(maze_layouts):
             elif event.type == pygame.MOUSEBUTTONDOWN:
             # if pygame.mouse.get_pressed()[0]: # Mouse must be moved to update
                 for sprite in plain_sprites:
-                    lvl_complete = sprite.update(ball_speed, CURRENT_EQUIP, LOADED_LEVEL)
+                    lvl_complete = sprite.update(CURRENT_EQUIP, LOADED_LEVEL)
                     if lvl_complete:
                         # Value can be changed to be dependent on score of player
                         _update_money_display(1000)
