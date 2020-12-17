@@ -1,7 +1,7 @@
 
 import pygame.sprite
 import operator
-from maze import CURRENT_EQUIP
+# from maze import CURRENT_EQUIP
 
 from . import utils
 

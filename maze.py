@@ -147,9 +147,11 @@ def _complete_selection(menu):
     menu.disable()
     print(CURRENT_EQUIP)
 
-def _purchase_item(item):
+def _purchase_item(item, menu):
     global PLAYER_MONEY
     global EQUIP_PURCHASED
+
+    global ITEM_DICT
     # print(item)
 
     # Item has already been purchased
@@ -161,6 +163,17 @@ def _purchase_item(item):
         EQUIP_PURCHASED[item.slot].append(item)
         _update_money_display()
         print(item.name, 'purchased')
+
+        c_button = ITEM_DICT[item]
+        # c_button = menu.get_widget(c_index)
+        # print(c_button)
+        # (c_index.set_background_color((0,255,0))
+        
+        new_font = c_button.get_font_info()
+        new_font['background_color'] = (100, 150, 100, 255)
+        c_button.set_font(new_font['name'], new_font['size'], new_font['color'], new_font['selected_color'], new_font['background_color'])
+        c_button.set_background_color(new_font['background_color'])
+
 
     pass
 
@@ -260,9 +273,9 @@ def create_equipment_shop(item_list):
         enabled = False,
         onclose = pygame_menu.events.EXIT,
         center_content = False,
-        column_max_width = [SCREEN_WIDTH / c] * c
+        column_max_width = [SCREEN_WIDTH / c] * c,
         # menu_position = (0, 0),
-        # mouse_motion_selection = True,
+        mouse_motion_selection = True,
         )
     tile_padding = 30
     tile_size = SCREEN_HEIGHT - (tile_padding * (r+1))
@@ -301,12 +314,11 @@ def create_equipment_shop(item_list):
             menu_shop.add_vertical_margin(tile_size)
             row += 1
         
-        menu_shop.add_button(
-            item.name, _purchase_item, item,
+        c_button = menu_shop.add_button(
+            item.name, _purchase_item, item, menu_shop,
             margin = (tile_padding, tile_padding),
         )
-        c_menu = menu_shop.get_index()
-        ITEM_DICT[c_menu] = item
+        ITEM_DICT[item] = c_button
         row += 1
 
     # TODO: ADD MONEY DISPLAY, VISUAL INDICATION OF PURCHASE
