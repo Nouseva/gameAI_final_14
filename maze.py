@@ -13,7 +13,7 @@ try:
     from core import utils
     from core.agent import Agent
     from core.layout import getLayout
-    
+    from core.agent import CURRENT_EQUIP
     
 except ImportError as err:
     print("couldn't load module. %s" % err)
@@ -34,7 +34,7 @@ UNLOCKED_LEVELS = []
 
 EQUIP_PURCHASED = dict()
 
-CURRENT_EQUIP = dict()
+
 COUNTER_WIDGET_ID = 'display_money'
 PLAYER_MONEY = 0
 
