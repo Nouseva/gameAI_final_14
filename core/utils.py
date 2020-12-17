@@ -11,6 +11,24 @@ except ImportError as err:
     sys.exit(2)
 
 
+class Point():
+    """
+        Allows easier addition of positions
+    """
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.tup = (x, y)
+
+    def __add__(self, other):
+        return Point(self.x + other.x, self.y + other.y)
+    
+    def __str__(self):
+        return str((self.x, self.y))
+    
+    def __getitem__(self, key):
+        return self.tup[key]
+
 def load_image(name, colorkey=None):
     fullname = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'resources', name)
     try:

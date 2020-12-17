@@ -129,7 +129,9 @@ def _load_select(menu):
     LEVEL_SELECT.enable()
     pass
 
-def _update_money_display():
+def _update_money_display(money_change):
+    global PLAYER_MONEY
+    PLAYER_MONEY += money_change
     widget = EQUIP_STORE.get_widget(COUNTER_WIDGET_ID)
     new_title = 'MONEY: ' + str(PLAYER_MONEY)
     widget.set_title(new_title)
@@ -160,9 +162,9 @@ def _purchase_item(item, menu):
         return
 
     if PLAYER_MONEY >= item.cost:
-        PLAYER_MONEY -= item.cost
+        cost = 0 - item.cost
         EQUIP_PURCHASED[item.slot].append(item)
-        _update_money_display()
+        _update_money_display(cost)
         print(item.name, 'purchased')
 
         c_button = ITEM_DICT[item]
@@ -358,7 +360,7 @@ def goto_equip_store(surface):
     global EQUIP_STORE
     global PLAYER_MONEY
 
-    _update_money_display()
+    _update_money_display(0)
 
     while EQUIP_STORE.is_enabled():
         FPS_CLOCK.tick(30)
@@ -368,16 +370,14 @@ def goto_equip_store(surface):
         for event in events:
 
             if event.type == pygame.KEYDOWN:
+                change = 0
                 if event.key == K_0:
-                    PLAYER_MONEY = 0
-                    print(PLAYER_MONEY)
+                    change -= PLAYER_MONEY
                 elif event.key == K_m:
-                    PLAYER_MONEY += 1000
-                    print(PLAYER_MONEY)
+                    change += 1000
                 elif event.key == K_MINUS:
-                    PLAYER_MONEY -= 1000
-                    print(PLAYER_MONEY)
-                _update_money_display()
+                    change -= 1000
+                _update_money_display(change)
 
         EQUIP_STORE.draw(surface)
         EQUIP_STORE.update(events)
@@ -479,25 +479,13 @@ def main(maze_layouts):
             elif event.type == pygame.MOUSEBUTTONDOWN:
             # if pygame.mouse.get_pressed()[0]: # Mouse must be moved to update
                 for sprite in plain_sprites:
-                    collision = sprite.update(ball_speed, CURRENT_EQUIP, LOADED_LEVEL)
-                    if collision != -1:
-                        # print(collision)
-                        ball_rect = sprite.getRect()
-                        wall_rect = walls[collision]
-                        # wall_rect = pygame.Rect(collision)
-
-                        """
-                        if collision[1] == 0 or collision[1] == 2:
-                            ball_speed[1] = -ball_speed[1]
-                        if collision[1] == 1 or collision[1] == 3:
-                            ball_speed[0] = -ball_speed[0]
-
-                        """
-                        if ball_rect.left < wall_rect.right or ball_rect.right > wall_rect.left:
-                            ball_speed[0] = -ball_speed[0]
-                        if ball_rect.top < wall_rect.bottom or ball_rect.bottom > wall_rect.top:
-                            ball_speed[1] = -ball_speed[1]
-                        # """
+                    lvl_complete = sprite.update(ball_speed, CURRENT_EQUIP, LOADED_LEVEL)
+                    if lvl_complete:
+                        # Value can be changed to be dependent on score of player
+                        _update_money_display(1000)
+                        foreground.fill(BG_COLOR)
+                        LEVEL_SELECT.is_enabled()
+                        
 
         if LEVEL_SELECT.is_enabled():
             results = goto_level_select(surface_main, UNLOCKED_LEVELS)
