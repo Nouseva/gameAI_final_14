@@ -13,7 +13,7 @@ try:
     from core import utils
     from core.agent import Agent
     from core.layout import getLayout
-    from core.agent import CURRENT_EQUIP
+    # from core.agent import CURRENT_EQUIP
     
 except ImportError as err:
     print("couldn't load module. %s" % err)
@@ -33,6 +33,7 @@ LOADED_LEVEL = None
 UNLOCKED_LEVELS = []
 
 EQUIP_PURCHASED = dict()
+CURRENT_EQUIP = dict()
 
 
 COUNTER_WIDGET_ID = 'display_money'
@@ -82,7 +83,7 @@ def load_layout(layout):
         else:
             image = 'test_icon.png'
 
-        agents.append(Agent(image, pos=(tile_width * agent[1][0], tile_height * agent[1][1])))
+        agents.append(Agent(image, CURRENT_EQUIP, (tile_width, tile_height), pos=(agent[1][0], agent[1][1])))
         # print(agents)
 
 
@@ -478,7 +479,7 @@ def main(maze_layouts):
             elif event.type == pygame.MOUSEBUTTONDOWN:
             # if pygame.mouse.get_pressed()[0]: # Mouse must be moved to update
                 for sprite in plain_sprites:
-                    collision = sprite.update(ball_speed, CURRENT_EQUIP, walls)
+                    collision = sprite.update(ball_speed, CURRENT_EQUIP, LOADED_LEVEL)
                     if collision != -1:
                         # print(collision)
                         ball_rect = sprite.getRect()

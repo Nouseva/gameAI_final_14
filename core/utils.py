@@ -54,13 +54,22 @@ def nearestPoint(pos):
     """
     Finds the nearest grid point to a position (discretizes).
     """
-
+    print(pos)
     (current_row, current_col) = pos
 
     grid_row = int(current_row + 0.5)
     grid_col = int(current_col + 0.5)
 
     return (grid_row, grid_col)
+
+def pos_to_coord(pos, grid_size):
+    """ Converts a position index of layout, to a pixel coordinate on the screen
+    """
+
+    pix_x = pos[0] * grid_size[0]
+    pix_y = pos[1] * grid_size[1]
+
+    return nearestPoint((pix_x, pix_y))
 
 def matrixAsList(matrix, value = True):
     """

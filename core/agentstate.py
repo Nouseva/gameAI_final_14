@@ -45,7 +45,7 @@ class AgentState:
         
     def isBraveGhost(self):
         """
-        A ghost that is not scared.
+        # A ghost that is not scared.
         """
 
         return (self.isGhost() and not self.isScared())

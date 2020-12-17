@@ -44,6 +44,9 @@ class Layout(object):
     def getGoal(self):
         return self.goal
 
+    def getTile(self, pos):
+        return self.layoutText[pos[0]][pos[1]]
+
     def __str__(self):
         return '\n'.join(self.layoutText)
 

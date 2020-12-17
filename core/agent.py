@@ -1,7 +1,7 @@
 
 import pygame.sprite
 import operator
-CURRENT_EQUIP = dict()
+# CURRENT_EQUIP = dict()
 
 from . import utils
 
@@ -25,7 +25,8 @@ def calculateValue(object, depth, discount):
     finalValue = discountMultiplier * value
     return finalValue
 
-def heuristic(self, equiped_list, adj_value):
+def default_heuristic(self, equiped_list, adj_value):
+    print('adj_val', adj_value)
     heur = 0
     empty_list = ['.', ',' ,'-']
     #if enemey
@@ -41,59 +42,6 @@ def heuristic(self, equiped_list, adj_value):
         heur = 100
     return heur
 
-#return values are best move, which would be 0 = N, 1 = E, 2 = S, 3 = W.
-#The second return value is heuristic score for computation of best move associated with that step.
-def calculateBestMove(self, mapArr, currentX, currentY, historyList, valuesDict, visionScore, depth, discount):
-    #if reached peak of depth then end the recursion
-    if (visionScore == depth):
-        return 0, 0
-
-
-    #4 possible moves, North, East, South, West. They all start with a heuristical value of 0, and the final return value will be a value which will correspond with the direction to take. 1 for north 2 for east 3 for south 4 for west.
-    nObj = mapArr[currentX][currentY+1]
-    eObj = mapArr[currentX+1][currentY]
-    sObj = mapArr[currentX][currentY-1]
-    wObj = mapArr[currentX-1][currentY]
-    valuesArr= [0] * 4 #this is used in the future to find max index and value.
-    historyList.append((currentX, currentY))
-
-    #if moving in that direction is a wall, or a place we have been before, we do no calculations and never go in that direction. Calculate values for all four directions.
-    if (nObj == '%' or (currentX, currentY) in historyList):
-        nValue = -1000
-    else:
-        _, nFutureValue = calculateBestMove(self, mapArr, currentX, currentY+1, historyList, valuesDict, visionScore, depth+1, discount)
-        nValue = calculateValue(nObj, depth, discount) + nFutureValue + heuristic(self, CURRENT_EQUIP, nObj)
-        valuesArr[0] = nValue
-
-    if (eObj == '%' or (currentX, currentY) in historyList):
-        eValue = -1000
-    else:
-        _, eFutureValue = calculateBestMove(self, mapArr, currentX+1, currentY, historyList, valuesDict, visionScore, depth+1, discount)
-        eValue = calculateValue(eObj, depth, discount) + eFutureValue + heuristic(self, CURRENT_EQUIP, eObj)
-        valuesArr[1] = eValue
-
-    if (sObj == '%' or (currentX, currentY) in historyList):
-        sValue = -1000
-    else:
-        _, sFutureValue = calculateBestMove(self, mapArr, currentX, currentY-1, historyList, valuesDict, visionScore, depth+1, discount)
-        sValue = calculateValue(sObj, depth, discount) + sFutureValue + heuristic(self, CURRENT_EQUIP, sObj)
-        valuesArr[2] = sValue
-
-    if (wObj == '%' or (currentX, currentY) in historyList):
-        wValue = -1000
-    else:
-        _, wFutureValue = calculateBestMove(self, mapArr, currentX-1, currentY, historyList, valuesDict, visionScore, depth+1, discount)
-        wValue = calculateValue(wObj, depth, discount) + wFutureValue  + heuristic(self, CURRENT_EQUIP, wObj)
-        valuesArr[3] = wValue
-
-    #out of all the options presented, return the move, which should be max index, and the heuristical value which is needed for any recursive calculations.
-    max_index, max_value = max(enumerate(valuesArr), key=operator.itemgetter(1))
-    return max_index, max_value
-
-
-
-
-
 class Agent(pygame.sprite.Sprite):
     """
     An agent is something in the world that does something
@@ -108,15 +56,23 @@ class Agent(pygame.sprite.Sprite):
 
     """
 
-    def __init__(self, image, heurstic = None, pos = None, index = 0):
+    def __init__(self, image, equipment, tile_size, heuristic = default_heuristic, pos = None, index = 0):
         pygame.sprite.Sprite.__init__(self)
         self.image, self.rect = utils.load_image(image, -1)
+        self.tile_size = tile_size
         if pos:
-            self.rect = self.rect.move(pos)
+            self.rect = self.rect.move((self.tile_size[0] * pos[0], self.tile_size[1] * pos[1]))
+            self.pos  = pos
+        else:
+            self.pos  = utils.nearestPoint((self.rect[0] / self.tile_size[0], self.rect[1] / self.tile_size[1]))
+        # self.rect = utils.nearestPoint(self.rect)
+
         self.index = index
+        self.equipment = equipment
+        self.heuristic = heuristic
         # self.bump  = utils.load_sound('collision.ogg')
 
-    def update(self, action, list_of_components, walls):
+    def update(self, action, list_of_components, layout):
         """Move based on the action that was given
 
         Args:
@@ -127,9 +83,17 @@ class Agent(pygame.sprite.Sprite):
             : False if action will cause agent to collide with walls, True otherwise
 
         """
-
-        self.rect = self.rect.move(action)
-        collision = self.rect.collidelist(walls)
+        move, _ = self.calculateBestMove(layout, self.pos[0], self.pos[1], [], dict(), 0, 10)
+        print('best_move', move)
+        print('current_pos', self.pos)
+        # self.rect = self.rect.move(action)
+        move = (self.pos[0] - move[0], self.pos[1] - move[1])
+        pix_move = utils.pos_to_coord(move, self.tile_size)
+        print('pix_move', pix_move)
+        self.rect = self.rect.move(pix_move)
+        self.pos  = move
+        # collision = self.rect.collidelist(layout.walls.asList())
+        collision = layout.isWall(move)
         if collision == -1:
             pass
             # TODO: behavior when agent collides with wall
@@ -139,4 +103,69 @@ class Agent(pygame.sprite.Sprite):
 
     def getRect(self):
         return self.rect
+
+    def getVision(self):
+        if 'googles' in self.equipment:
+            return 8
+        else:
+            return 5
+
+    #return values are best move, which would be 0 = N, 1 = E, 2 = S, 3 = W.
+    #The second return value is heuristic score for computation of best move associated with that step.
+    def calculateBestMove(self, layout, currentX, currentY, historyList, valuesDict, depth, discount):
+
+        #if reached peak of depth then end the recursion
+        if (self.getVision() == depth):
+            return 0, 0
+
+
+        #4 possible moves, North, East, South, West. They all start with a heuristical value of 0, and the final return value will be a value which will correspond with the direction to take. 1 for north 2 for east 3 for south 4 for west.
+        north = (currentX, currentY + 1)
+        east  = (currentX + 1, currentY)
+        south = (currentX, currentY - 1)
+        west  = (currentX - 1, currentY)
+        index_to_position = [north, east, south, west]
+        # nObj = layout[currentX][currentY+1]
+        # eObj = layout[currentX+1][currentY]
+        # sObj = layout[currentX][currentY-1]
+        # wObj = layout[currentX-1][currentY]
+        valuesArr= [0] * 4 #this is used in the future to find max index and value.
+        historyList.append((currentX, currentY))
+
+        #if moving in that direction is a wall, or a place we have been before, we do no calculations and never go in that direction. Calculate values for all four directions.
+        if (layout.isWall(north) or (currentX, currentY) in historyList):
+            print('invalid north')
+            nValue = -1000
+        else:
+            _, nFutureValue = calculateBestMove(self, layout, currentX, currentY+1, historyList, valuesDict, depth+1, discount)
+            nValue = calculateValue(nObj, depth, discount) + nFutureValue + self.heuristic(self, CURRENT_EQUIP, layout.getTile(north))
+            valuesArr[0] = nValue
+
+        if (layout.isWall(east) or (currentX, currentY) in historyList):
+            print('invalid east')
+            eValue = -1000
+        else:
+            _, eFutureValue = calculateBestMove(self, layout, currentX+1, currentY, historyList, valuesDict, depth+1, discount)
+            eValue = calculateValue(eObj, depth, discount) + eFutureValue + self.heuristic(self, CURRENT_EQUIP, layout.getTile(east))
+            valuesArr[1] = eValue
+
+        if (layout.isWall(south) or (currentX, currentY) in historyList):
+            print('invalid south')
+            sValue = -1000
+        else:
+            _, sFutureValue = calculateBestMove(self, layout, currentX, currentY-1, historyList, valuesDict, depth+1, discount)
+            sValue = calculateValue(sObj, depth, discount) + sFutureValue + self.heuristic(self, CURRENT_EQUIP, layout.getTile(south))
+            valuesArr[2] = sValue
+
+        if (layout.isWall(west) or (currentX, currentY) in historyList):
+            print('invalid west')
+            wValue = -1000
+        else:
+            _, wFutureValue = calculateBestMove(self, layout, currentX-1, currentY, historyList, valuesDict, depth+1, discount)
+            wValue = calculateValue(wObj, depth, discount) + wFutureValue  + self.heuristic(self, CURRENT_EQUIP, layout.getTile(west))
+            valuesArr[3] = wValue
+
+        #out of all the options presented, return the move, which should be max index, and the heuristical value which is needed for any recursive calculations.
+        max_index, max_value = max(enumerate(valuesArr), key=operator.itemgetter(1))
+        return index_to_position[max_index], max_value
 
