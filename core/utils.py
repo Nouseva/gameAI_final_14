@@ -69,7 +69,7 @@ def pos_to_coord(pos, grid_size):
     pix_x = pos[0] * grid_size[0]
     pix_y = pos[1] * grid_size[1]
 
-    return nearestPoint((pix_x, pix_y))
+    return (pix_x, pix_y)
 
 def matrixAsList(matrix, value = True):
     """
