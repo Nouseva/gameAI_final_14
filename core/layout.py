@@ -16,6 +16,8 @@ class Layout(object):
         self.width  = len(layoutText[0])
         self.height = len(layoutText)
         self.walls  = Grid(self.width, self.height, initialValue = False)
+        self.roads  = Grid(self.width, self.height, initialValue = False)
+        self.boost  = Grid(self.width, self.height, initialValue = False)
         self.food   = Grid(self.width, self.height, initialValue = False)
         self.goal   = None
         
@@ -32,6 +34,21 @@ class Layout(object):
         x, y = pos
         return self.walls[x][y]
     
+    def isEnemy(self, pos):
+        return pos in self.agentPositions[1:]
+
+    def isFood(self, pos):
+        x, y = pos
+        return self.food[x][y]
+
+    def isRoad(self, pos):
+        x, y = pos
+        return self.roads[x][y]
+    
+    def isBoost(self, pos):
+        x, y = pos
+        return self.roads[x][y]
+    
     def isGoal(self, pos):
         return self.goal == pos
 
@@ -44,8 +61,14 @@ class Layout(object):
     def getGoal(self):
         return self.goal
 
-    def getTile(self, pos):
-        return self.layoutText[pos[0]][pos[1]]
+    # def getTile(self, pos):
+    #     print(pos, self.width, self.height)
+    #     print(self.layoutText)
+    #     if (pos[0]) in range(self.width) and pos[1] in range(self.height):
+    #         return self.layoutText[pos[0]][pos[1]]
+
+    #     else:
+    #         return None
 
     def __str__(self):
         return '\n'.join(self.layoutText)
@@ -65,6 +88,8 @@ class Layout(object):
             E - Enemy
             P - Player Agent
             o - Food
+            , = Road
+            - = Booster
         '''
         Other characters are ignored
         """
@@ -82,7 +107,11 @@ class Layout(object):
         elif layoutChar == 'G':
             self.goal = (x, y)
         elif layoutChar == 'o':
-            self.food[x][y] == True
+            self.food[x][y] = True
+        elif layoutChar == ',':
+            self.roads[x][y] = True
+        elif layoutChar == '-':
+            self.boost[x][y] = True
         elif layoutChar == 'P':
             self.agentPositions.append((0, (x, y)))
         elif layoutChar == 'E' and (maxEnemies is None or self.numEnemies < maxEnemies):
