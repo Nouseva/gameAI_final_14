@@ -21,10 +21,12 @@ except ImportError as err:
 
 ##### VARIABLES #####
 SCREEN_SIZE = SCREEN_WIDTH, SCREEN_HEIGHT = 1200, 600
-BG_COLOR = 'black'
 WALL_THICKNESS = 20
-WALL_COLOR = 'white'
 FPS_CLOCK = None
+
+BG_COLOR = 'black'
+WALL_COLOR = 'white'
+GOAL_COLOR = 'yellow'
 
 Item = namedtuple('Item', ['name', 'cost', 'effect', 'slot'])
 
@@ -73,6 +75,9 @@ def load_layout(layout):
 
     for wall in walls:
         pygame.draw.rect(loaded_layout, WALL_COLOR, wall)
+
+    gx, gy = layout.getGoal()
+    pygame.draw.rect(loaded_layout, GOAL_COLOR, (gx * tile_width, gy * tile_height, tile_width, tile_height))
     
     for agent in layout.agentPositions:
         image = None
