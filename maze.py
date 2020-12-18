@@ -24,6 +24,7 @@ except ImportError as err:
 SCREEN_SIZE = SCREEN_WIDTH, SCREEN_HEIGHT = 1200, 600
 WALL_THICKNESS = 20
 FPS_CLOCK = None
+FPS = 30
 
 BG_COLOR = 'black'
 WALL_COLOR = 'white'
@@ -33,6 +34,8 @@ Item = namedtuple('Item', ['name', 'cost', 'effect', 'slot'])
 
 ACTIVE_LEVEL = None
 LOADED_LEVEL = None
+MODIFYABLE_LEVEL = None
+
 UNLOCKED_LEVELS = []
 
 EQUIP_PURCHASED = dict()
@@ -48,6 +51,10 @@ LEVEL_SELECT = None
 EQUIP_STORE = None
 EQUIP_MENU = None
 
+GROUP_PLAYER  = pygame.sprite.Group()
+GROUP_ENEMIES = pygame.sprite.Group()
+GROUP_COINS   = pygame.sprite.Group()
+
 # ITEMS = None
 # DEFAULT_RESOURCES_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'resources')
 
@@ -59,22 +66,30 @@ def load_layout(layout):
     Returns:
         (walls, agents, loaded_layout)
     """
+    global MODIFYABLE_LEVEL
+    global GROUP_COINS
+    global GROUP_ENEMIES
+    global GROUP_PLAYER
 
     _set_level(0, layout)
-    print(layout)
+    # print(layout)
+    MODIFYABLE_LEVEL = layout.deepCopy()
 
     loaded_layout = pygame.Surface(SCREEN_SIZE)
     walls = []
-    coins = dict()
-    agents = []
     boosts = []
+
+    GROUP_PLAYER  = pygame.sprite.Group()
+    GROUP_ENEMIES = pygame.sprite.Group()
+    GROUP_COINS   = pygame.sprite.Group()
+
 
     # print(layout.agentPositions)
     tile_width = SCREEN_WIDTH / layout.width
     tile_height = SCREEN_HEIGHT / layout.height
-    print('before', tile_width, tile_height)
+    # print('before', tile_width, tile_height)
     tile_width, tile_height = utils.nearestPoint((tile_width, tile_height))
-    print('after', tile_width, tile_height)
+    # print('after', tile_width, tile_height)
     
     for wall_tile in layout.walls.asList():
         walls.append(pygame.Rect(wall_tile[0] * tile_width, wall_tile[1] * tile_height, tile_width, tile_height))
@@ -83,7 +98,7 @@ def load_layout(layout):
         pygame.draw.rect(loaded_layout, WALL_COLOR, wall)
 
     for coin_pos in layout.food.asList():
-        coins[coin_pos] = sprite_derived.Coin(coin_pos, (tile_width, tile_height))
+        GROUP_COINS.add(sprite_derived.Coin(coin_pos, (tile_width, tile_height)))
     for boost_s in layout.roads.asList():
         boosts.append(sprite_derived.Boost_S(boost_s, (tile_width, tile_height)))
     for boost_l in layout.boost.asList():
@@ -93,7 +108,7 @@ def load_layout(layout):
     pygame.draw.rect(loaded_layout, GOAL_COLOR, (gx * tile_width, gy * tile_height, tile_width, tile_height))
     
     for agent in layout.agentPositions:
-        print(agent)
+        # print(agent)
         image = None
         # Player agent
         if agent[0]:
@@ -104,14 +119,14 @@ def load_layout(layout):
             image = 'enemy.png'
 
         if agent[0]:
-            agents.append(Agent(image, CURRENT_EQUIP, (tile_width, tile_height), pos=(agent[1][0], agent[1][1])))
+            GROUP_PLAYER.add(Agent(image, CURRENT_EQUIP, (tile_width, tile_height), pos=(agent[1][0], agent[1][1])))
         else:
-            agents.append(Agent(image, CURRENT_EQUIP, (tile_width, tile_height), pos = (agent[1][0], agent[1][1]), index = 1))
+            GROUP_ENEMIES.add(Agent(image, CURRENT_EQUIP, (tile_width, tile_height), pos = (agent[1][0], agent[1][1]), index = 1))
         # print(agents)
 
 
     load_layout = loaded_layout.convert()
-    plain_sprites = pygame.sprite.RenderPlain(coins.values(), boosts, agents[::-1], )
+    plain_sprites = pygame.sprite.RenderPlain(boosts,)
 
     return walls, plain_sprites, loaded_layout
 
@@ -119,7 +134,7 @@ def load_layout(layout):
 """
 def _start_game(menu):
     global LOADED_LEVEL
-    print(ACTIVE_LEVEL)
+    # print(ACTIVE_LEVEL)
     if ACTIVE_LEVEL:
         LOADED_LEVEL = getLayout(ACTIVE_LEVEL)
 
@@ -172,7 +187,7 @@ def _complete_selection(menu):
     global CURRENT_EQUIP
 
     menu.disable()
-    print(CURRENT_EQUIP)
+    # print(CURRENT_EQUIP)
 
 def _purchase_item(item, menu):
     global PLAYER_MONEY
@@ -364,7 +379,7 @@ def goto_level_select(surface, maze_layouts):
     # TODO: Fix bug where ACTIVE_LEVEL does not match selector after first call
     ACTIVE_LEVEL = maze_layouts[0][1]
     while LEVEL_SELECT.is_enabled():
-        FPS_CLOCK.tick(30)
+        FPS_CLOCK.tick(FPS)
 
         events = pygame.event.get()
 
@@ -384,7 +399,7 @@ def goto_equip_store(surface):
     global EQUIP_STORE
     global PLAYER_MONEY
 
-    _update_money_display(0)
+    _update_money_display(FPS)
 
     while EQUIP_STORE.is_enabled():
         FPS_CLOCK.tick(30)
@@ -414,7 +429,7 @@ def goto_equip_screen(surface):
     global EQUIP_MENU
 
     while EQUIP_MENU.is_enabled():
-        FPS_CLOCK.tick(30)
+        FPS_CLOCK.tick(FPS)
 
         events = pygame.event.get()
 
@@ -433,6 +448,8 @@ def goto_equip_screen(surface):
 def main(maze_layouts):
     global ACTIVE_LEVEL
     global LOADED_LEVEL
+    global MODIFYABLE_LEVEL
+
     global FPS_CLOCK
     global UNLOCKED_LEVELS
 
@@ -462,12 +479,10 @@ def main(maze_layouts):
 
     LEVEL_SELECT.enable()
 
-    ball_speed = [5, 5]
-
     FPS_CLOCK = pygame.time.Clock()
     while 1:
         # Framerate controller
-        FPS_CLOCK.tick(30)
+        FPS_CLOCK.tick(FPS)
         events = pygame.event.get()
 
         for event in events:
@@ -504,17 +519,21 @@ def main(maze_layouts):
             # Ball will only move when the mouse button is held down
             elif event.type == pygame.MOUSEBUTTONDOWN:
             # if pygame.mouse.get_pressed()[0]: # Mouse must be moved to update
-                for sprite in plain_sprites:
-                    lvl_complete = sprite.update(CURRENT_EQUIP, LOADED_LEVEL)
+                for sprite in GROUP_PLAYER:
+                    lvl_complete = sprite.update(CURRENT_EQUIP, MODIFYABLE_LEVEL, GROUP_ENEMIES, GROUP_COINS)
                     if lvl_complete:
                         # Value can be changed to be dependent on score of player
-                        _update_money_display(1000)
+                        # print(lvl_complete)
+                        _update_money_display(lvl_complete)
                         foreground = None
-                        plain_sprites = None
+                        plain_sprites = []
                         # surface_main.blit(foreground, (0, 0))
                         # surface_main.blit(background, (0, 0))
                         LEVEL_SELECT.enable()
                         LOADED_LEVEL = None
+                for sprite in GROUP_ENEMIES:
+                    sprite.update(None, MODIFYABLE_LEVEL, GROUP_PLAYER, None)
+
                         
 
         surface_main.blit(background, (0, 0))
@@ -532,6 +551,9 @@ def main(maze_layouts):
             surface_main.blit(foreground, (0, 0))
         if plain_sprites:
             plain_sprites.draw(surface_main)
+        GROUP_COINS.draw(surface_main)
+        GROUP_ENEMIES.draw(surface_main)
+        GROUP_PLAYER.draw(surface_main)
         pygame.display.flip()
 
 

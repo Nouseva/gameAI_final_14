@@ -22,6 +22,7 @@ class Layout(object):
         self.goal   = None
         
         self.agentPositions = []
+        self.enemyPositions = []
         self.numEnemies = 0
         self.layoutText = layoutText
 
@@ -35,7 +36,7 @@ class Layout(object):
         return self.walls[x][y]
     
     def isEnemy(self, pos):
-        return pos in self.agentPositions[1:]
+        return pos in self.enemyPositions
 
     def isFood(self, pos):
         x, y = pos
@@ -60,6 +61,12 @@ class Layout(object):
 
     def getGoal(self):
         return self.goal
+    
+    def removeEnemy(self, pos):
+        if self.isEnemy(pos):
+            self.enemyPositions.remove(pos)
+            self.agentPositions.remove((False, pos))
+            self.numEnemies -= 1 
 
     def __str__(self):
         return '\n'.join(self.layoutText)
@@ -91,6 +98,7 @@ class Layout(object):
                 self.processLayoutChar(x, y, layoutChar, maxEnemies)
         self.agentPositions.sort()
         self.agentPositions =[(i == 0, pos) for i, pos in self.agentPositions]
+        self.enemyPositions = [pos for agent, pos in self.agentPositions if not agent ]
 
     def processLayoutChar(self, x, y, layoutChar, maxEnemies):
         if   layoutChar == '%':
