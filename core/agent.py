@@ -133,7 +133,7 @@ class Agent(pygame.sprite.Sprite):
         # collision = self.rect.collidelist(layout.walls.asList())
         if self.index == 0:
             if layout.isGoal(self.pos):
-                return floor(score / GOAL_SCORE)
+                return floor(score / GOAL_SCORE) * 10
             # elif layout.
         return None
 

@@ -399,10 +399,10 @@ def goto_equip_store(surface):
     global EQUIP_STORE
     global PLAYER_MONEY
 
-    _update_money_display(FPS)
+    _update_money_display(0)
 
     while EQUIP_STORE.is_enabled():
-        FPS_CLOCK.tick(30)
+        FPS_CLOCK.tick(FPS)
 
         events = pygame.event.get()
 
@@ -525,8 +525,12 @@ def main(maze_layouts):
                         # Value can be changed to be dependent on score of player
                         # print(lvl_complete)
                         _update_money_display(lvl_complete)
+                        lvl_complete = None
                         foreground = None
                         plain_sprites = []
+                        GROUP_COINS.empty()
+                        GROUP_ENEMIES.empty()
+                        GROUP_PLAYER.empty()
                         # surface_main.blit(foreground, (0, 0))
                         # surface_main.blit(background, (0, 0))
                         LEVEL_SELECT.enable()
@@ -575,6 +579,7 @@ if __name__ == "__main__":
         Item('Wheels', 10, 'Wheely fast', 'legs'),
         Item('Backpack', 20, 'Soft sack', 'torso'),
         Item('Claws', 10, 'Spiky', 'arms'),
+        Item('Flower', 10, 'Wuv U', 'arms'),
         Item('Some Junk', 999, 'Useless', 'trinket'),
         Item('Magguffin 5000', 4999, 'One to rule them all', 'trinket'),
     ]
