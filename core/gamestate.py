@@ -55,4 +55,40 @@ class GameState(object):
         """
         Mark treasure as collected
         """
+        # No treasure to be collected
+        if (not self.hasFood(x, y)):
+            return False
+
+        if (not self._foodCopied):
+            self._food = self._food.copy()
+            self._foodCopied = True
+        self._food[x][y] = False
+        self._lastFoodEaten = (x, y)
+
+        self._hash = None
+        return True
+
+    def endGame(self, win):
+        self._gameover = True
+        self._win = win
+
+        self._hash = None
+
+    def getAgentPositon(self, index):
+        positon = self._agentStates[index].getPosition()
+        if positon is None:
+            return None
+
+        return tuple(int(pos) for pos in positon)
+
+    def getAgentState(self, index):
+        return self._agentStates[index]
+
+    def getAgentStates(self):
+        return self._agentStates
+
+    def getTreasure(self):
+        return self._food.copy()
+
+    # def get
     pass

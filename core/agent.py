@@ -106,7 +106,9 @@ class Agent(pygame.sprite.Sprite):
         self.pos  = move
         # collision = self.rect.collidelist(layout.walls.asList())
         if self.index == 0:
-            return layout.isGoal(self.pos)
+            if layout.isGoal(self.pos):
+                return -1
+            # elif layout.
         return False
 
     def getRect(self):
