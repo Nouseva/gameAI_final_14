@@ -62,7 +62,7 @@ class Agent(pygame.sprite.Sprite):
 
     def __init__(self, image, equipment, tile_size, heuristic = default_heuristic, pos = None, index = 0):
         pygame.sprite.Sprite.__init__(self)
-        self.image, self.rect = utils.load_image(image, -1)
+        self.image, self.rect = utils.load_image(image, scale = tile_size, colorkey = -1)
         self.tile_size = tile_size
         if pos:
             self.rect = self.rect.move((self.tile_size[0] * pos[0], self.tile_size[1] * pos[1]))
@@ -112,7 +112,7 @@ class Agent(pygame.sprite.Sprite):
         return self.rect
 
     def getVision(self):
-        if 'googles' in self.equipment:
+        if 'Googles' in self.equipment:
             return 8
         else:
             return 5

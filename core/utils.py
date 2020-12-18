@@ -32,7 +32,7 @@ class Point():
     def __eq__(self, other):
         return self.tup == other
 
-def load_image(name, colorkey=None):
+def load_image(name, colorkey=None, scale = None):
     fullname = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'resources', name)
     try:
         image = pygame.image.load(fullname)
@@ -53,6 +53,10 @@ def load_image(name, colorkey=None):
         if colorkey is -1:
             colorkey = image.get_at((0, 0))
             image.set_colorkey(colorkey, pygame.locals.RLEACCEL)
+
+    if scale is not None:
+        print(scale)
+        image = pygame.transform.scale(image, scale)
     return image, image.get_rect()
 
 def load_sound(name):

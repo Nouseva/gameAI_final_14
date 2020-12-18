@@ -69,6 +69,9 @@ def load_layout(layout):
     # print(layout.agentPositions)
     tile_width = SCREEN_WIDTH / layout.width
     tile_height = SCREEN_HEIGHT / layout.height
+    print('before', tile_width, tile_height)
+    tile_width, tile_height = utils.nearestPoint((tile_width, tile_height))
+    print('after', tile_width, tile_height)
     
     for wall_tile in layout.walls.asList():
         walls.append(pygame.Rect(wall_tile[0] * tile_width, wall_tile[1] * tile_height, tile_width, tile_height))
@@ -84,7 +87,8 @@ def load_layout(layout):
         image = None
         # Player agent
         if agent[0]:
-            image = 'intro_ball.gif'
+            # image = 'intro_ball.gif'
+            image = 'UCSC_slug.png'
         # Enemy agent
         else:
             image = 'test_icon.png'
@@ -426,9 +430,10 @@ def main(maze_layouts):
     pygame.init()
     surface_main = pygame.display.set_mode(SCREEN_SIZE)
 
-    logo, _ = utils.load_image('test_icon.png', -1)
+    # logo, _ = utils.load_image('test_icon.png', scale = (64, 64))
+    logo, _ = utils.load_image('UCSC_slug.png', scale = (64, 64))
     pygame.display.set_icon(logo)
-    pygame.display.set_caption('minimal program')
+    pygame.display.set_caption('UCSC CMPS 140 Final')
 
     background = pygame.Surface(surface_main.get_size())
     background = background.convert()
@@ -519,11 +524,16 @@ if __name__ == "__main__":
     layouts = [
         ('Test Maze', 'testMaze'),
         ('Easy Maze', 'mediumClassic'),
+        ('Level 01' , 'map_1'),
+        ('Level 02' , 'map_2'),
+        ('Level 03' , 'map_3'),
+        ('Level 04' , 'map_4'),
     ]
 
     global ITEMS
     # Items is a list of namedtuple Item()
     ITEMS = [
+        Item('Goggles', 30, 'Googly Goggles', 'helmet'),
         Item('Wheels', 10, 'Wheely fast', 'legs'),
         Item('Backpack', 20, 'Soft sack', 'torso'),
         Item('Claws', 10, 'Spiky', 'arms'),
@@ -531,13 +541,16 @@ if __name__ == "__main__":
         Item('Magguffin 5000', 4999, 'One to rule them all', 'trinket'),
     ]
 
-    EQUIP_PURCHASED['legs'] = [Item('', 0, '', 'legs')]
-    EQUIP_PURCHASED['torso'] = [Item('', 0, '', 'torso')]
-    EQUIP_PURCHASED['arms'] = [Item('', 0, '', 'arms')]
+    EQUIP_PURCHASED['helmet']  = [Item('', 0, '', 'helmet')]
+    EQUIP_PURCHASED['legs']    = [Item('', 0, '', 'legs')]
+    EQUIP_PURCHASED['torso']   = [Item('', 0, '', 'torso')]
+    EQUIP_PURCHASED['arms']    = [Item('', 0, '', 'arms')]
     EQUIP_PURCHASED['trinket'] = [Item('', 0, '', 'trinket')]
-    CURRENT_EQUIP['legs'] = EQUIP_PURCHASED['legs'][0]
-    CURRENT_EQUIP['torso'] = EQUIP_PURCHASED['torso'][0]
-    CURRENT_EQUIP['arms'] = EQUIP_PURCHASED['arms'][0]
+
+    CURRENT_EQUIP['helmet']  = EQUIP_PURCHASED['helmet'][0]
+    CURRENT_EQUIP['legs']    = EQUIP_PURCHASED['legs'][0]
+    CURRENT_EQUIP['torso']   = EQUIP_PURCHASED['torso'][0]
+    CURRENT_EQUIP['arms']    = EQUIP_PURCHASED['arms'][0]
     CURRENT_EQUIP['trinket'] = EQUIP_PURCHASED['trinket'][0]
 
 
