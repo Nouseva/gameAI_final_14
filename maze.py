@@ -15,7 +15,7 @@ try:
     from core.layout import getLayout
     from core import sprite_derived
     # from core.agent import CURRENT_EQUIP
-    
+
 except ImportError as err:
     print("couldn't load module. %s" % err)
     sys.exit(2)
@@ -75,7 +75,7 @@ def load_layout(layout):
     print('before', tile_width, tile_height)
     tile_width, tile_height = utils.nearestPoint((tile_width, tile_height))
     print('after', tile_width, tile_height)
-    
+
     for wall_tile in layout.walls.asList():
         walls.append(pygame.Rect(wall_tile[0] * tile_width, wall_tile[1] * tile_height, tile_width, tile_height))
 
@@ -91,7 +91,7 @@ def load_layout(layout):
 
     gx, gy = layout.getGoal()
     pygame.draw.rect(loaded_layout, GOAL_COLOR, (gx * tile_width, gy * tile_height, tile_width, tile_height))
-    
+
     for agent in layout.agentPositions:
         print(agent)
         image = None
@@ -195,7 +195,7 @@ def _purchase_item(item, menu):
         # c_button = menu.get_widget(c_index)
         # print(c_button)
         # (c_index.set_background_color((0,255,0))
-        
+
         new_font = c_button.get_font_info()
         new_font['background_color'] = (100, 150, 100, 255)
         c_button.set_font(new_font['name'], new_font['size'], new_font['color'], new_font['selected_color'], new_font['background_color'])
@@ -235,7 +235,7 @@ def create_level_select(level_list):
 
 def create_equipment_select():
     """ Constructs the menu that allows player to equip their agent (choose heuristics)
-    
+
     """
     global EQUIP_MENU
     global EQUIP_PURCHASED
@@ -272,13 +272,13 @@ def create_equipment_select():
             onchange = _set_equipment,
         )
 
-    
+
     EQUIP_MENU = menu_equip
     pass
 
 def create_equipment_shop(item_list):
     """ Menu that allows player to purchase the equipment that will be available to them.
-    (The heuristic options that can be chosen/modified) 
+    (The heuristic options that can be chosen/modified)
 
     Args:
         item_list: Items that will be sold to the player (display_name, index_of_item)
@@ -340,7 +340,7 @@ def create_equipment_shop(item_list):
         if row == 0:
             menu_shop.add_vertical_margin(tile_size)
             row += 1
-        
+
         c_button = menu_shop.add_button(
             item.name, _purchase_item, item, menu_shop,
             margin = (tile_padding, tile_padding),
@@ -375,9 +375,9 @@ def goto_level_select(surface, maze_layouts):
 
     if LOADED_LEVEL:
         results = load_layout(LOADED_LEVEL)
-        
+
         # results = results[0], plain_sprites, results[2]
-        
+
     return results
 
 def goto_equip_store(surface):
@@ -456,7 +456,7 @@ def main(maze_layouts):
     agents = None
 
     create_level_select(maze_layouts)
-    
+
     create_equipment_shop(ITEMS)
     create_equipment_select()
 
@@ -500,7 +500,7 @@ def main(maze_layouts):
                 elif event.key == pygame.K_i:
                     EQUIP_MENU.enable()
                     pass
-            
+
             # Ball will only move when the mouse button is held down
             elif event.type == pygame.MOUSEBUTTONDOWN:
             # if pygame.mouse.get_pressed()[0]: # Mouse must be moved to update
@@ -515,7 +515,7 @@ def main(maze_layouts):
                         # surface_main.blit(background, (0, 0))
                         LEVEL_SELECT.enable()
                         LOADED_LEVEL = None
-                        
+
 
         surface_main.blit(background, (0, 0))
         if LEVEL_SELECT.is_enabled():
@@ -544,6 +544,7 @@ if __name__ == "__main__":
         ('Level 02' , 'map_2'),
         ('Level 03' , 'map_3'),
         ('Level 04' , 'map_4'),
+        ('Demo Maze' , 'demo_map'),
     ]
 
     global ITEMS
@@ -574,6 +575,3 @@ if __name__ == "__main__":
 
     # print(layouts)
     main(layouts)
-
-
-

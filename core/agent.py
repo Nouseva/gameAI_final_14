@@ -35,13 +35,13 @@ def default_heuristic(self, equiped_list, pos, layout):
     # empty_list = ['.', ',' ,'-']
     #if enemey
     if 'Claws' in equiped_list and layout.isEnemy(pos):
-        heur = -60
+        heur = 200
     #if no enemy, but treasure
     elif 'Backpack' in equiped_list and layout.isFood(pos):
-        heur = -40
+        heur = 200
     #if no enemy and no treasure
     elif 'Wheels' in equiped_list and (layout.isRoad(pos) or layout.isBoost(pos)):
-        heur = -10
+        heur = 150
     else:
         heur = 100
     return heur
@@ -124,9 +124,9 @@ class Agent(pygame.sprite.Sprite):
 
     def getVision(self):
         if 'Googles' in self.equipment:
-            return 15
+            return 8
         else:
-            return 10
+            return 5
 
     def getRandNeighbor(self, layout):
         north = self.pos + utils.Point(0, 1)
