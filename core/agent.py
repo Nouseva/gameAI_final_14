@@ -112,8 +112,11 @@ class Agent(pygame.sprite.Sprite):
         self.rect = self.rect.move(pix_move)
         self.pos  = move
         # collision = self.rect.collidelist(layout.walls.asList())
-        lvl_complete = layout.isGoal(self.pos)
-        return lvl_complete
+        if self.index == 0:
+            if layout.isGoal(self.pos):
+                return -1
+            # elif layout.
+        return False
 
     def getRect(self):
         return self.rect
@@ -132,7 +135,7 @@ class Agent(pygame.sprite.Sprite):
         stop  = self.pos
 
         directions = [north, east, south, west, stop]
-        print(directions)
+        # print(directions)
         valid = []
         for d in directions:
             if not layout.isWall(d.tup):

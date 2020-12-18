@@ -40,5 +40,55 @@ class GameState(object):
 
         self._score = 0
 
+
+    def generateSuccessor(self, agentIndex, action):
         pass
+
+    def getLegalActions(self, agentIndex = 0):
+        pass
+
+    def addScore(self, score):
+        self._hash = None
+        self._score += score
+
+    def collectTreasure(self, x, y):
+        """
+        Mark treasure as collected
+        """
+        # No treasure to be collected
+        if (not self.hasFood(x, y)):
+            return False
+
+        if (not self._foodCopied):
+            self._food = self._food.copy()
+            self._foodCopied = True
+        self._food[x][y] = False
+        self._lastFoodEaten = (x, y)
+
+        self._hash = None
+        return True
+
+    def endGame(self, win):
+        self._gameover = True
+        self._win = win
+
+        self._hash = None
+
+    def getAgentPositon(self, index):
+        positon = self._agentStates[index].getPosition()
+        if positon is None:
+            return None
+
+        return tuple(int(pos) for pos in positon)
+
+    def getAgentState(self, index):
+        return self._agentStates[index]
+
+    def getAgentStates(self):
+        return self._agentStates
+
+    def getTreasure(self):
+        return self._food.copy()
+
+    # def get
     pass
