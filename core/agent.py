@@ -49,8 +49,11 @@ def default_heuristic(self, equiped_list, pos, layout):
     #if no enemy and no treasure
     elif 'Wheels' in equiped_list and (layout.isRoad(pos.tup) or layout.isBoost(pos.tup)):
         heur = 150
+    elif 'Flower' in equiped_list and layout.isEnemy(pos):
+        heur = -100
     else:
         heur = 100
+    print(heur)
     return heur
 
 class Agent(pygame.sprite.Sprite):
@@ -240,8 +243,8 @@ class Agent(pygame.sprite.Sprite):
             if (west.tup in visitedDict):
                 wValue -= 100 * visitedDict[west.tup]
         valuesArr[3] = wValue
-        # if (depth == 0):
-            # print(valuesArr)
+        if (depth == 0):
+             print(valuesArr)
         maxValue = max(valuesArr)
         keysArr = []
         for i in range(len(valuesArr)):
