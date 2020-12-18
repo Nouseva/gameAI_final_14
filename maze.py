@@ -89,7 +89,7 @@ def load_layout(layout):
     tile_height = SCREEN_HEIGHT / layout.height
     # print('before', tile_width, tile_height)
     tile_width, tile_height = utils.nearestPoint((tile_width, tile_height))
-    print('after', tile_width, tile_height)
+    # print('after', tile_width, tile_height)
 
     for wall_tile in layout.walls.asList():
         walls.append(pygame.Rect(wall_tile[0] * tile_width, wall_tile[1] * tile_height, tile_width, tile_height))
