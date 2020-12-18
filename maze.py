@@ -111,7 +111,7 @@ def load_layout(layout):
 
 
     load_layout = loaded_layout.convert()
-    plain_sprites = pygame.sprite.RenderPlain(agents, coins.values(), boosts)
+    plain_sprites = pygame.sprite.RenderPlain(coins.values(), boosts, agents[::-1], )
 
     return walls, plain_sprites, loaded_layout
 
