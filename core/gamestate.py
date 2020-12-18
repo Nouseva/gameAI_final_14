@@ -40,5 +40,19 @@ class GameState(object):
 
         self._score = 0
 
+
+    def generateSuccessor(self, agentIndex, action):
         pass
+
+    def getLegalActions(self, agentIndex = 0):
+        pass
+
+    def addScore(self, score):
+        self._hash = None
+        self._score += score
+
+    def collectTreasure(self, x, y):
+        """
+        Mark treasure as collected
+        """
     pass

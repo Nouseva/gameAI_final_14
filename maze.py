@@ -13,6 +13,7 @@ try:
     from core import utils
     from core.agent import Agent
     from core.layout import getLayout
+    from core import sprite_derived
     # from core.agent import CURRENT_EQUIP
     
 except ImportError as err:
@@ -64,7 +65,9 @@ def load_layout(layout):
 
     loaded_layout = pygame.Surface(SCREEN_SIZE)
     walls = []
+    coins = dict()
     agents = []
+    boosts = []
 
     # print(layout.agentPositions)
     tile_width = SCREEN_WIDTH / layout.width
@@ -78,6 +81,13 @@ def load_layout(layout):
 
     for wall in walls:
         pygame.draw.rect(loaded_layout, WALL_COLOR, wall)
+
+    for coin_pos in layout.food.asList():
+        coins[coin_pos] = sprite_derived.Coin(coin_pos, (tile_width, tile_height))
+    for boost_s in layout.roads.asList():
+        boosts.append(sprite_derived.Boost_S(boost_s, (tile_width, tile_height)))
+    for boost_l in layout.boost.asList():
+        boosts.append(sprite_derived.Boost_L(boost_l, (tile_width, tile_height)))
 
     gx, gy = layout.getGoal()
     pygame.draw.rect(loaded_layout, GOAL_COLOR, (gx * tile_width, gy * tile_height, tile_width, tile_height))
@@ -101,8 +111,9 @@ def load_layout(layout):
 
 
     load_layout = loaded_layout.convert()
+    plain_sprites = pygame.sprite.RenderPlain(agents, coins.values(), boosts)
 
-    return walls, agents, loaded_layout
+    return walls, plain_sprites, loaded_layout
 
 """Functions here handle the creation of all user interfaces
 """
@@ -364,8 +375,8 @@ def goto_level_select(surface, maze_layouts):
 
     if LOADED_LEVEL:
         results = load_layout(LOADED_LEVEL)
-        plain_sprites = pygame.sprite.RenderPlain(results[1])
-        results = results[0], plain_sprites, results[2]
+        
+        # results = results[0], plain_sprites, results[2]
         
     return results
 
