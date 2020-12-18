@@ -101,7 +101,7 @@ def load_layout(layout):
             image = 'UCSC_slug.png'
         # Enemy agent
         else:
-            image = 'test_icon.png'
+            image = 'enemy.png'
 
         if agent[0]:
             agents.append(Agent(image, CURRENT_EQUIP, (tile_width, tile_height), pos=(agent[1][0], agent[1][1])))

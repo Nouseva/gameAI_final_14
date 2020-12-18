@@ -18,9 +18,9 @@ def calculateValue(pos, layout, depth, discount):
     elif layout.isRoad(pos):
         value = 20
     elif layout.isBoost(pos):
-        value == 30
+        value = 30
     elif layout.isGoal(pos):
-        value == 5000
+        value = 5000
     # elif (object == 'P'):
     # assume that only option remaining is plain empty space
     else:
