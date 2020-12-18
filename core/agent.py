@@ -42,7 +42,7 @@ def default_heuristic(self, equiped_list, pos, layout, depth, discount):
     elif 'Flower' in equiped_list and layout.isEnemy(pos.tup):
         print("IN FLOWER")
         # TODO: maybe fix this value?
-        heur = -200
+        heur = -400
     #if no enemy, but treasure
     elif 'Backpack' in equiped_list and layout.isFood(pos.tup):
         heur = 200
