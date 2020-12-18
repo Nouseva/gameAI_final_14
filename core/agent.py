@@ -1,7 +1,7 @@
 
 import pygame.sprite
 import operator
-
+import random
 # self.equipment = dict()
 from random import choice
 from . import utils
@@ -71,10 +71,11 @@ class Agent(pygame.sprite.Sprite):
             x, y  = utils.nearestPoint((self.rect[0] / self.tile_size[0], self.rect[1] / self.tile_size[1]))
             self.pos = utils.Point(x, y)
         # self.rect = utils.nearestPoint(self.rect)
-    
+
         self.index = index
         self.equipment = equipment
         self.heuristic = heuristic
+        self.visitedDict = dict()
         # self.bump  = utils.load_sound('collision.ogg')
 
     def update(self, list_of_components, layout):
@@ -88,13 +89,19 @@ class Agent(pygame.sprite.Sprite):
             : False if action will cause agent to collide with walls, True otherwise
 
         """
+        if self.pos.tup in self.visitedDict:
+            self.visitedDict[self.pos.tup] += 1
+        else:
+           self.visitedDict[self.pos.tup] = 0
+    #    self.visitedList.append(self.pos)
+
         # Agent is enemy
         if self.index > 0:
             move = self.getRandNeighbor(layout)
 
         # Agent is player
         else:
-            move, _ = self.calculateBestMove(layout, self.pos, [], dict(), 0, 10)
+            move, _ = self.calculateBestMove(layout, self.pos, [], dict(), 0, 0.99, self.visitedDict)
 
         print('best_move', move)
         print('current_pos', self.pos)
@@ -113,9 +120,9 @@ class Agent(pygame.sprite.Sprite):
 
     def getVision(self):
         if 'Googles' in self.equipment:
-            return 8
+            return 15
         else:
-            return 5
+            return 10
 
     def getRandNeighbor(self, layout):
         north = self.pos + utils.Point(0, 1)
@@ -136,7 +143,7 @@ class Agent(pygame.sprite.Sprite):
 
     #return values are best move, which would be 0 = N, 1 = E, 2 = S, 3 = W.
     #The second return value is heuristic score for computation of best move associated with that step.
-    def calculateBestMove(self, layout, current_pos, historyList, valuesDict, depth, discount):
+    def calculateBestMove(self, layout, current_pos, historyList, valuesDict, depth, discount, visitedDict):
 
         #if reached peak of depth then end the recursion
         if (self.getVision() == depth):
@@ -156,44 +163,68 @@ class Agent(pygame.sprite.Sprite):
         valuesArr = [0] * 4#this is used in the future to find max index and value.
 
         #if moving in that direction is a wall, or a place we have been before, we do no calculations and never go in that direction. Calculate values for all four directions.
-        if (layout.isWall(north) or current_pos in historyList):
+        historyList.append(current_pos)
+        if (layout.isWall(north)):
             print(depth, ': invalid north')
             nValue = -1000
         else:
-            historyList.append(current_pos)
-            _, nFutureValue = self.calculateBestMove(layout, north, historyList, valuesDict, depth+1, discount)
+            _, nFutureValue = self.calculateBestMove(layout, north, historyList, valuesDict, depth+1, discount, visitedDict)
             nValue = calculateValue(north, layout, depth, discount) + nFutureValue + self.heuristic(self, self.equipment, north, layout)
+            if (north in historyList):
+                nValue -= 100
+            if (north.tup in visitedDict):
+                nValue -= 50 * visitedDict[north.tup]
         valuesArr[0] = nValue
 
-        if (layout.isWall(east) or current_pos in historyList):
+        if (layout.isWall(east)):
             print(depth, ': invalid east')
             eValue = -1000
         else:
-            historyList.append(current_pos)
-            _, eFutureValue = self.calculateBestMove(layout, east, historyList, valuesDict, depth+1, discount)
+            _, eFutureValue = self.calculateBestMove(layout, east, historyList, valuesDict, depth+1, discount, visitedDict)
             eValue = calculateValue(east, layout, depth, discount) + eFutureValue + self.heuristic(self, self.equipment, east, layout)
+            if (east in historyList):
+                eValue -= 100
+            if (east.tup in visitedDict):
+                eValue -= 50 * visitedDict[east.tup]
         valuesArr[1] = eValue
 
-        if (layout.isWall(south) or current_pos in historyList):
+        if (layout.isWall(south)):
             print(depth, ': invalid south')
             sValue = -1000
+        elif (south in historyList):
+            sValue = -100
         else:
-            historyList.append(current_pos)
-            _, sFutureValue = self.calculateBestMove(layout, south, historyList, valuesDict, depth+1, discount)
+            _, sFutureValue = self.calculateBestMove(layout, south, historyList, valuesDict, depth+1, discount, visitedDict)
             sValue = calculateValue(south, layout, depth, discount) + sFutureValue + self.heuristic(self, self.equipment, south, layout)
+            if (south in historyList):
+                sValue -= 100
+            if (south.tup in visitedDict):
+                sValue -= 50 * visitedDict[south.tup]
         valuesArr[2] = sValue
 
-        if (layout.isWall(west) or current_pos in historyList):
+        if (layout.isWall(west)):
             print(depth, ': invalid west')
             wValue = -1000
+        elif (west in historyList):
+            wValue = -100
         else:
-            historyList.append(current_pos)
-            _, wFutureValue = self.calculateBestMove(layout, west, historyList, valuesDict, depth+1, discount)
+            _, wFutureValue = self.calculateBestMove(layout, west, historyList, valuesDict, depth+1, discount, visitedDict)
             wValue = calculateValue(west, layout, depth, discount) + wFutureValue  + self.heuristic(self, self.equipment, west, layout)
+            if (west in historyList):
+                wValue -= 100
+            if (west.tup in visitedDict):
+                wValue -= 50 * visitedDict[west.tup]
         valuesArr[3] = wValue
 
         print(valuesArr)
-        #out of all the options presented, return the move, which should be max index, and the heuristical value which is needed for any recursive calculations.
-        max_index, max_value = max(enumerate(valuesArr), key=operator.itemgetter(1))
-        return index_to_position[max_index], max_value
+        maxValue = max(valuesArr)
+        keysArr = []
+        for i in range(len(valuesArr)):
+            if valuesArr[i] == maxValue:
+                keysArr.append(i)
 
+        choice = random.choice(keysArr)
+        #out of all the options presented, return the move, which should be max index, and the heuristical value which is needed for any recursive calculations.
+        #max_index, max_value = max(enumerate(valuesArr), key=operator.itemgetter(1))
+
+        return index_to_position[choice], choice
