@@ -55,7 +55,7 @@ def load_image(name, colorkey=None, scale = None):
             image.set_colorkey(colorkey, pygame.locals.RLEACCEL)
 
     if scale is not None:
-        print(scale)
+        # print(scale)
         image = pygame.transform.scale(image, scale)
     return image, image.get_rect()
 
@@ -79,7 +79,7 @@ def nearestPoint(pos):
     """
     Finds the nearest grid point to a position (discretizes).
     """
-    print(pos)
+    # print(pos)
     (current_row, current_col) = pos
 
     grid_row = int(current_row + 0.5)

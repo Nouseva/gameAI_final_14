@@ -3,8 +3,11 @@ import pygame.sprite
 import operator
 import random
 # self.equipment = dict()
-from random import choice
+# from random import choice
+from math import floor
 from . import utils
+
+GOAL_SCORE = 5000
 
 def calculateValue(pos, layout, depth, discount):
     discountMultiplier = discount**depth
@@ -20,7 +23,7 @@ def calculateValue(pos, layout, depth, discount):
     elif layout.isBoost(pos):
         value = 30
     elif layout.isGoal(pos):
-        value = 5000
+        value = GOAL_SCORE
     # elif (object == 'P'):
     # assume that only option remaining is plain empty space
     else:
@@ -78,7 +81,7 @@ class Agent(pygame.sprite.Sprite):
         self.visitedDict = dict()
         # self.bump  = utils.load_sound('collision.ogg')
 
-    def update(self, list_of_components, layout):
+    def update(self, list_of_components, layout, enemy_sprites, collectable_coins):
         """Move based on the action that was given
 
         Args:
@@ -89,7 +92,7 @@ class Agent(pygame.sprite.Sprite):
             : False if action will cause agent to collide with walls, True otherwise
 
         """
-        print("NEXT MOOOOVE")
+        # print("NEXT MOOOOVE")
         if self.pos.tup in self.visitedDict:
             self.visitedDict[self.pos.tup] += 1
         else:
@@ -98,11 +101,12 @@ class Agent(pygame.sprite.Sprite):
 
         # Agent is enemy
         if self.index > 0:
-            move = self.getRandNeighbor(layout)
+            # move = self.getRandNeighbor(layout, enemy_sprites)
+            return
 
         # Agent is player
         else:
-            move, _ = self.calculateBestMove(layout, self.pos, [], dict(), 0, 0.90, self.visitedDict)
+            move, score = self.calculateBestMove(layout, self.pos, [], dict(), 0, 0.90, self.visitedDict)
 
     #    print('best_move', move)
     #    print('current_pos', self.pos)
@@ -112,12 +116,26 @@ class Agent(pygame.sprite.Sprite):
 
         self.rect = self.rect.move(pix_move)
         self.pos  = move
+
+        # Clean up collisions
+        if layout.isFood(move.tup):
+            layout.food[move.x][move.y] = False
+            for sprite in collectable_coins.sprites():
+                if sprite.pos == move:
+                    collectable_coins.remove(sprite)
+        elif layout.isEnemy(move.tup):
+            # print('enemy at', move)
+            layout.removeEnemy(move.tup)
+            # print(layout.agentPositions)
+            for sprite in enemy_sprites.sprites():
+                if sprite.pos == move:
+                    enemy_sprites.remove(sprite)
         # collision = self.rect.collidelist(layout.walls.asList())
         if self.index == 0:
             if layout.isGoal(self.pos):
-                return -1
+                return floor(score / GOAL_SCORE)
             # elif layout.
-        return False
+        return None
 
     def getRect(self):
         return self.rect
@@ -141,7 +159,7 @@ class Agent(pygame.sprite.Sprite):
         for d in directions:
             if not layout.isWall(d.tup):
                 valid.append(d)
-        move = choice(valid)
+        move = random.choice(valid)
 
         return move
 
@@ -217,8 +235,8 @@ class Agent(pygame.sprite.Sprite):
             if (west.tup in visitedDict):
                 wValue -= 100 * visitedDict[west.tup]
         valuesArr[3] = wValue
-        if (depth == 0):
-            print(valuesArr)
+        # if (depth == 0):
+            # print(valuesArr)
         maxValue = max(valuesArr)
         keysArr = []
         for i in range(len(valuesArr)):
