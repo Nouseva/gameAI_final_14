@@ -432,6 +432,7 @@ def goto_equip_screen(surface):
 
 def main(maze_layouts):
     global ACTIVE_LEVEL
+    global LOADED_LEVEL
     global FPS_CLOCK
     global UNLOCKED_LEVELS
 
@@ -508,10 +509,15 @@ def main(maze_layouts):
                     if lvl_complete:
                         # Value can be changed to be dependent on score of player
                         _update_money_display(1000)
-                        foreground.fill(BG_COLOR)
-                        LEVEL_SELECT.is_enabled()
+                        foreground = None
+                        plain_sprites = None
+                        # surface_main.blit(foreground, (0, 0))
+                        # surface_main.blit(background, (0, 0))
+                        LEVEL_SELECT.enable()
+                        LOADED_LEVEL = None
                         
 
+        surface_main.blit(background, (0, 0))
         if LEVEL_SELECT.is_enabled():
             results = goto_level_select(surface_main, UNLOCKED_LEVELS)
             if results:
@@ -522,7 +528,6 @@ def main(maze_layouts):
             goto_equip_screen(surface_main)
 
         # plain_sprites.update()
-        surface_main.blit(background, (0, 0))
         if foreground:
             surface_main.blit(foreground, (0, 0))
         if plain_sprites:
