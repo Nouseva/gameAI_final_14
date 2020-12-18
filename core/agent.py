@@ -35,15 +35,19 @@ def calculateValue(pos, layout, depth, discount):
 def default_heuristic(self, equiped_list, pos, layout):
     # print('adj_val', adj_value)
     heur = 0
+    equiped_list = [item.name for item in equiped_list.values()]
     # empty_list = ['.', ',' ,'-']
     #if enemey
-    if 'Claws' in equiped_list and layout.isEnemy(pos):
+    if 'Claws' in equiped_list and layout.isEnemy(pos.tup):
         heur = 200
+    elif 'Flower' in equiped_list and layout.isEnemy(pos.tup):
+        # TODO: maybe fix this value?
+        heur = -200
     #if no enemy, but treasure
-    elif 'Backpack' in equiped_list and layout.isFood(pos):
+    elif 'Backpack' in equiped_list and layout.isFood(pos.tup):
         heur = 200
     #if no enemy and no treasure
-    elif 'Wheels' in equiped_list and (layout.isRoad(pos) or layout.isBoost(pos)):
+    elif 'Wheels' in equiped_list and (layout.isRoad(pos.tup) or layout.isBoost(pos.tup)):
         heur = 150
     else:
         heur = 100
@@ -82,6 +86,7 @@ class Agent(pygame.sprite.Sprite):
         # self.bump  = utils.load_sound('collision.ogg')
 
     def update(self, list_of_components, layout, enemy_sprites, collectable_coins):
+        print(list_of_components)
         """Move based on the action that was given
 
         Args:
