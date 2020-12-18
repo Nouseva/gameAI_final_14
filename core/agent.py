@@ -40,6 +40,7 @@ def default_heuristic(self, equiped_list, pos, layout, depth, discount):
     if 'Claws' in equiped_list and layout.isEnemy(pos.tup):
         heur = 200
     elif 'Flower' in equiped_list and layout.isEnemy(pos.tup):
+        print("IN FLOWER")
         # TODO: maybe fix this value?
         heur = -200
     #if no enemy, but treasure
@@ -101,7 +102,7 @@ class Agent(pygame.sprite.Sprite):
         if self.pos.tup in self.visitedDict:
             self.visitedDict[self.pos.tup] += 1
         else:
-           self.visitedDict[self.pos.tup] = 0
+           self.visitedDict[self.pos.tup] = 1
     #    self.visitedList.append(self.pos)
 
         # Agent is enemy
@@ -111,7 +112,7 @@ class Agent(pygame.sprite.Sprite):
 
         # Agent is player
         else:
-        #    print(*self.visitedDict)
+            print(*self.visitedDict.values())
             move, score = self.calculateBestMove(layout, self.pos, [], dict(), 0, 0.90, self.visitedDict)
 
     #    print('best_move', move)
@@ -244,8 +245,8 @@ class Agent(pygame.sprite.Sprite):
             if (west.tup in visitedDict):
                 wValue -= 100 * visitedDict[west.tup]
         valuesArr[3] = wValue
-        #if (depth == 0):
-        #     print(valuesArr)
+        if (depth == 0):
+             print(valuesArr)
         maxValue = max(valuesArr)
         keysArr = []
         for i in range(len(valuesArr)):
