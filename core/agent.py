@@ -18,9 +18,9 @@ def calculateValue(pos, layout, depth, discount):
     elif layout.isRoad(pos):
         value = 20
     elif layout.isBoost(pos):
-        value == 30
+        value = 30
     elif layout.isGoal(pos):
-        value == 5000
+        value = 5000
     # elif (object == 'P'):
     # assume that only option remaining is plain empty space
     else:
@@ -89,6 +89,7 @@ class Agent(pygame.sprite.Sprite):
             : False if action will cause agent to collide with walls, True otherwise
 
         """
+        print("NEXT MOOOOVE")
         if self.pos.tup in self.visitedDict:
             self.visitedDict[self.pos.tup] += 1
         else:
@@ -101,13 +102,13 @@ class Agent(pygame.sprite.Sprite):
 
         # Agent is player
         else:
-            move, _ = self.calculateBestMove(layout, self.pos, [], dict(), 0, 0.99, self.visitedDict)
+            move, _ = self.calculateBestMove(layout, self.pos, [], dict(), 0, 0.90, self.visitedDict)
 
-        print('best_move', move)
-        print('current_pos', self.pos)
+    #    print('best_move', move)
+    #    print('current_pos', self.pos)
         directional_move = (move[0] - self.pos.x, move[1]- self.pos.y)
         pix_move = utils.pos_to_coord(directional_move, self.tile_size)
-        print('pix_move', pix_move)
+    #    print('pix_move', pix_move)
 
         self.rect = self.rect.move(pix_move)
         self.pos  = move
@@ -168,58 +169,56 @@ class Agent(pygame.sprite.Sprite):
         #if moving in that direction is a wall, or a place we have been before, we do no calculations and never go in that direction. Calculate values for all four directions.
         historyList.append(current_pos)
         if (layout.isWall(north)):
-            print(depth, ': invalid north')
-            nValue = -1000
+        #    print(depth, ': invalid north')
+            nValue = -10000
         else:
             _, nFutureValue = self.calculateBestMove(layout, north, historyList, valuesDict, depth+1, discount, visitedDict)
             nValue = calculateValue(north, layout, depth, discount) + nFutureValue + self.heuristic(self, self.equipment, north, layout)
             if (north in historyList):
-                nValue -= 100
+                nValue -= 500
             if (north.tup in visitedDict):
-                nValue -= 50 * visitedDict[north.tup]
+                nValue -= 100 * visitedDict[north.tup]
         valuesArr[0] = nValue
 
         if (layout.isWall(east)):
-            print(depth, ': invalid east')
-            eValue = -1000
+    #        print(depth, ': invalid east')
+            eValue = -10000
         else:
             _, eFutureValue = self.calculateBestMove(layout, east, historyList, valuesDict, depth+1, discount, visitedDict)
             eValue = calculateValue(east, layout, depth, discount) + eFutureValue + self.heuristic(self, self.equipment, east, layout)
             if (east in historyList):
-                eValue -= 100
+                eValue -= 500
             if (east.tup in visitedDict):
-                eValue -= 50 * visitedDict[east.tup]
+                eValue -= 100 * visitedDict[east.tup]
         valuesArr[1] = eValue
 
         if (layout.isWall(south)):
-            print(depth, ': invalid south')
-            sValue = -1000
-        elif (south in historyList):
-            sValue = -100
+        #    print(depth, ': invalid south')
+            sValue = -10000
         else:
             _, sFutureValue = self.calculateBestMove(layout, south, historyList, valuesDict, depth+1, discount, visitedDict)
             sValue = calculateValue(south, layout, depth, discount) + sFutureValue + self.heuristic(self, self.equipment, south, layout)
             if (south in historyList):
-                sValue -= 100
+                sValue -= 500
             if (south.tup in visitedDict):
-                sValue -= 50 * visitedDict[south.tup]
+                sValue -= 100 * visitedDict[south.tup]
         valuesArr[2] = sValue
 
         if (layout.isWall(west)):
-            print(depth, ': invalid west')
-            wValue = -1000
-        elif (west in historyList):
-            wValue = -100
+        #    print(depth, ': invalid west')
+            wValue = -10000
         else:
+
             _, wFutureValue = self.calculateBestMove(layout, west, historyList, valuesDict, depth+1, discount, visitedDict)
+        #    print(wFutureValue)
             wValue = calculateValue(west, layout, depth, discount) + wFutureValue  + self.heuristic(self, self.equipment, west, layout)
             if (west in historyList):
-                wValue -= 100
+                wValue -= 500
             if (west.tup in visitedDict):
-                wValue -= 50 * visitedDict[west.tup]
+                wValue -= 100 * visitedDict[west.tup]
         valuesArr[3] = wValue
-
-        print(valuesArr)
+        if (depth == 0):
+            print(valuesArr)
         maxValue = max(valuesArr)
         keysArr = []
         for i in range(len(valuesArr)):
@@ -230,4 +229,4 @@ class Agent(pygame.sprite.Sprite):
         #out of all the options presented, return the move, which should be max index, and the heuristical value which is needed for any recursive calculations.
         #max_index, max_value = max(enumerate(valuesArr), key=operator.itemgetter(1))
 
-        return index_to_position[choice], choice
+        return index_to_position[choice], valuesArr[choice]
