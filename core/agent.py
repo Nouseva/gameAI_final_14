@@ -13,21 +13,19 @@ def calculateValue(pos, layout, depth, discount):
     discountMultiplier = discount**depth
     value = 0
     if layout.isEnemy(pos):
-        value = 60
+        value = 50
     elif layout.isFood(pos):
-        value = 40
-    # elif (object == '.'):
-    #     value = 10
+        value = 50
     elif layout.isRoad(pos):
-        value = 20
+        value = 50
     elif layout.isBoost(pos):
-        value = 30
+        value = 50
     elif layout.isGoal(pos):
         value = GOAL_SCORE
     # elif (object == 'P'):
     # assume that only option remaining is plain empty space
     else:
-        value = 10
+        value = 0
 
     finalValue = discountMultiplier * value
     return finalValue
@@ -49,11 +47,9 @@ def default_heuristic(self, equiped_list, pos, layout):
     #if no enemy and no treasure
     elif 'Wheels' in equiped_list and (layout.isRoad(pos.tup) or layout.isBoost(pos.tup)):
         heur = 150
-    elif 'Flower' in equiped_list and layout.isEnemy(pos):
-        heur = -100
     else:
         heur = 100
-    print(heur)
+    #print(heur)
     return heur
 
 class Agent(pygame.sprite.Sprite):
@@ -197,11 +193,12 @@ class Agent(pygame.sprite.Sprite):
         if (layout.isWall(north)):
         #    print(depth, ': invalid north')
             nValue = -10000
+        elif (north in historyList):
+            nValue = 0
         else:
-            _, nFutureValue = self.calculateBestMove(layout, north, historyList, valuesDict, depth+1, discount, visitedDict)
+            newHistoryList = historyList.copy()
+            _, nFutureValue = self.calculateBestMove(layout, north, newHistoryList, valuesDict, depth+1, discount, visitedDict)
             nValue = calculateValue(north, layout, depth, discount) + nFutureValue + self.heuristic(self, self.equipment, north, layout)
-            if (north in historyList):
-                nValue -= 500
             if (north.tup in visitedDict):
                 nValue -= 100 * visitedDict[north.tup]
         valuesArr[0] = nValue
@@ -209,11 +206,12 @@ class Agent(pygame.sprite.Sprite):
         if (layout.isWall(east)):
     #        print(depth, ': invalid east')
             eValue = -10000
+        elif (east in historyList):
+            eValue = 0
         else:
-            _, eFutureValue = self.calculateBestMove(layout, east, historyList, valuesDict, depth+1, discount, visitedDict)
+            newHistoryList = historyList.copy()
+            _, eFutureValue = self.calculateBestMove(layout, east, newHistoryList, valuesDict, depth+1, discount, visitedDict)
             eValue = calculateValue(east, layout, depth, discount) + eFutureValue + self.heuristic(self, self.equipment, east, layout)
-            if (east in historyList):
-                eValue -= 500
             if (east.tup in visitedDict):
                 eValue -= 100 * visitedDict[east.tup]
         valuesArr[1] = eValue
@@ -221,11 +219,12 @@ class Agent(pygame.sprite.Sprite):
         if (layout.isWall(south)):
         #    print(depth, ': invalid south')
             sValue = -10000
+        elif (south in historyList):
+            sValue = 0
         else:
-            _, sFutureValue = self.calculateBestMove(layout, south, historyList, valuesDict, depth+1, discount, visitedDict)
+            newHistoryList = historyList.copy()
+            _, sFutureValue = self.calculateBestMove(layout, south, newHistoryList, valuesDict, depth+1, discount, visitedDict)
             sValue = calculateValue(south, layout, depth, discount) + sFutureValue + self.heuristic(self, self.equipment, south, layout)
-            if (south in historyList):
-                sValue -= 500
             if (south.tup in visitedDict):
                 sValue -= 100 * visitedDict[south.tup]
         valuesArr[2] = sValue
@@ -233,13 +232,13 @@ class Agent(pygame.sprite.Sprite):
         if (layout.isWall(west)):
         #    print(depth, ': invalid west')
             wValue = -10000
+        elif (west in historyList):
+            wValue = 0
         else:
-
-            _, wFutureValue = self.calculateBestMove(layout, west, historyList, valuesDict, depth+1, discount, visitedDict)
+            newHistoryList = historyList.copy()
+            _, wFutureValue = self.calculateBestMove(layout, west, newHistoryList, valuesDict, depth+1, discount, visitedDict)
         #    print(wFutureValue)
             wValue = calculateValue(west, layout, depth, discount) + wFutureValue  + self.heuristic(self, self.equipment, west, layout)
-            if (west in historyList):
-                wValue -= 500
             if (west.tup in visitedDict):
                 wValue -= 100 * visitedDict[west.tup]
         valuesArr[3] = wValue
